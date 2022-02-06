@@ -1,17 +1,59 @@
 .app-dark-mode{
 
+    @mixin rounded-lght{
+        background-color: transparent;
+        color:white;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    @mixin secondary-bg {
+        background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    @mixin inputs-colors {
+        color: white;
+        background-color: #0E0E0E;
+        border-color: #cccccc91;
+    }
+      
+
+
     .btn-primary{
         color:white;
     }
 
     .btn-secondary{
-        background-color: rgba(255, 255, 255, 0.15);
+        @include secondary-bg();
     }
 
     .btn-light{
-        background-color: transparent;
-        color:white;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        @include rounded-lght();
     }
+
+    .btn-link{
+        color: white;
+    }
+
+    .bg-light-mod{
+        @include rounded-lght();
+    }
+
+
+    .bg-secondary-mod{
+        @include secondary-bg();
+    }
+
+    .bg-secondary-mod-1{
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .form-control{
+        @include inputs-colors;
+    }
+
+    .input-group-text{
+        @include inputs-colors;
+    }
+
 
 }

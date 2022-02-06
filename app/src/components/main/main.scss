@@ -1,0 +1,62 @@
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/mixins";
+@import "~bootstrap/scss/utilities";
+
+
+
+.app-dark-mode{
+    .mainContentHolder{
+        background-color: #0E0E0E;
+        background-image: url('./bg-img-dark.jpg');
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+
+    .mainContent{
+
+        .social-how{
+        
+            .btn-how-copy{
+                background-image: url('./document.png');
+            }
+
+            .btn-how-tele{
+                background-image: url('./telegram.png');
+            }
+
+            .btn-how-discord{
+                background-image: url('./discord-negative.png');
+            }
+
+        }
+    }    
+}
+
+
+.mainContent{
+    .high-yield-left{
+        background-image: url('./rectangle-2.png');
+        min-height: 15rem;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center bottom;
+
+        @include media-breakpoint-up(md){
+            background-size: cover;
+        }
+    }
+
+    .social-how{
+        .icon-how{
+            height: 1.5rem;
+            width: 1.5rem;
+            background-repeat: no-repeat;
+            background-size: contain;
+        }
+
+    }
+
+
+
+}

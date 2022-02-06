@@ -13,20 +13,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 
 import Topbar from './components/topBar';
+import MainContent from './components/main';
 
 
-function MainContent() {
-  const web3Ctx = useweb3Context();
-
-  /*
-  if( (!web3Ctx?.account) || web3Ctx?.reconnecting){
-    return <ConnectWallet />;
-  }
-  */
-
-  return <div>hello world</div>;
-
-}
 
 export default function () {
 
@@ -36,7 +25,7 @@ export default function () {
 
       <Topbar />
 
-      <div className='flex-grow-1 d-flex justify-content-center align-items-center'>
+      <div className='flex-grow-1 d-flex justify-content-center align-items-center mainContentHolder'>
         <MainContent />
       </div>
 
