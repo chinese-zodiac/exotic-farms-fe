@@ -1,0 +1,41 @@
+.topBar{
+    padding: 1.25rem 3rem;
+  
+    .logo{
+      font-size: 1.5rem;
+      height: 3.5rem;
+      background-image: url('./image2.png');
+      background-repeat: no-repeat;
+      background-size: contain;
+  
+      span{
+        margin-left: 3.5rem;
+        padding: 0 0.75rem;
+      }
+    }
+  
+    .networkBtn{
+        background-image: url('./right-icon.png');
+        height: 1.5rem;
+        background-repeat: no-repeat;
+        background-position: right;
+        padding-right: 1.5rem;
+        background-size: contain;
+    }
+
+    .modeswitch{
+        padding:0.2rem;
+
+        .icon{
+
+            background-image: url('./moon.png');
+            background-repeat: no-repeat;
+            background-size: contain;
+            background-position: center;
+            width: 2rem;
+            height: 2rem;
+    
+        }
+
+    }
+  }
