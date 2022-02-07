@@ -12,9 +12,8 @@ import { ShowAddress } from './components/utils/display';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 
-import Topbar from './components/topBar';
+import { Topbar, BottomBar } from './components/navbars';
 import MainContent from './components/main';
-
 
 
 export default function () {
@@ -25,10 +24,15 @@ export default function () {
 
       <Topbar />
 
-      <div className='flex-grow-1 d-flex justify-content-center align-items-center mainContentHolder'>
-        <MainContent />
-      </div>
+      <div className="mainContentHolder py-5">
 
+        <div className='flex-grow-1 d-flex justify-content-center align-items-center'>
+          <MainContent />
+        </div>
+
+        <BottomBar />
+
+      </div>
 
     </div>
   </Web3Provider>;

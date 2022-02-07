@@ -1,0 +1,61 @@
+.poolsView{
+
+    .guide{
+        background-repeat: no-repeat;
+        background-position: right;
+        background-size: contain;
+        padding-right: 1.5rem;
+    }
+
+    .cashLogo{
+        margin-left: -0.5rem;
+    }
+
+    .poolLogo{
+
+        padding: 0.25rem;
+        display: inline-block;
+
+        .logo, .bnbLogo, .busdLogo {
+            width: 1.875rem;
+            height: 1.875rem; 
+            
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .bnbLogo{
+            background-image: url('./binance-coin-bnb.png');
+        }
+
+        .busdLogo{
+            background-image: url('./binance-usd-busd.png');
+        }
+
+        .logo{
+            background-image: url('./czodiac-token.png');
+        }
+        
+    }
+
+    .poolBtn{
+            width: 3rem;
+            height: 3rem; 
+            background-image: url('./arrow_right.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+    }
+
+
+}
+
+.app-dark-mode{
+    .poolsView{
+        .guide{
+            background-image: url('./diagonal-up.png');
+    
+        }
+    }
+}

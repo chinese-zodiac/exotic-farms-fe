@@ -4,7 +4,7 @@ import './main.scss';
 import {Row, Col, Container, Button} from "react-bootstrap";
 
 import LoopCZF from './loopCZF';
-import ChronoPools from '../chronoPools';
+import {ChronoPools, ExoticFarms} from '../pools';
 
 export default function MainContent() {
     const web3Ctx = useweb3Context();
@@ -73,6 +73,9 @@ export default function MainContent() {
 
         <ChronoPools/>
 
+        <div className="my-5"></div>
+
+        <ExoticFarms/>
 
     </Container>;
 
