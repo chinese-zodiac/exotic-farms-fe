@@ -5,6 +5,10 @@ export type ChainInfo = {
     name: string;
     hexChainId: string;
     rpcProvider: string;
+    contracts:{
+        chronoPoolService:string;
+        exoticMaster:string;
+    }
 }
 
 export type ConnectCtx ={
@@ -54,10 +58,13 @@ export class Injectedweb3 {
 
         const { chainId } = chainInfo;
 
+        //For trust wallet/safepal, since they do not support EIP-3326 (switching networks)
+        if(!!this.injected.isTrust) return;
+
         try {
             console.log(`current chain id ${this.injected.networkVersion}`);
 
-            if (this.injected.networkVersion == chainId) {
+            if (this.injected.networkVersion === chainId) {
                 console.log(`current chain id ${chainId} is correct`);
                 return;
             }
@@ -71,7 +78,7 @@ export class Injectedweb3 {
 
         } catch (switchError: any) {
 
-            const j = switchError.code;
+            //const j = switchError.code;
 
 
             // This error code indicates that the chain has not been added to MetaMask.
@@ -100,13 +107,14 @@ export class Injectedweb3 {
                 } catch (addError: any) {
 
                     console.error(`failed to add network : ${addError?.message}`);
-                    throw new Error("failed to switch network. Please switch manually and try again");
+                    throw new Error("failed to switch network. Please switch manually and try again "+switchError.code);
                 }
             }
 
-            console.error(`failed to switch network : ${switchError}`);
+            //Do not throw error , due to poor support for EIP-3326 in web3 wallets that appear to be identical to metamask but do not support network switching.
+            //console.error(`failed to switch network : ${switchError}`);
 
-            throw new Error("failed to switch network. Please switch manually and try again");
+            //throw new Error("failed to switch network. Please switch manually and try again");
         }
 
     }

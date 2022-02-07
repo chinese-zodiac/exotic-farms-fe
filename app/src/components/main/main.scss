@@ -36,9 +36,11 @@
         background-repeat: no-repeat;
         background-position: center bottom;
 
+        /*
         @include media-breakpoint-up(md){
             background-size: cover;
         }
+        */
     }
 
     .social-how{

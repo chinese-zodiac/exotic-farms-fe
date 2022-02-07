@@ -80,7 +80,7 @@
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
     "test": "node scripts/test.js",
-    "generateTypes": "typechain --target=web3-v1  --out-dir ./typechain ../rabbit-catch-hardhat/artifacts/contracts/RabbitCatchMaster.sol/RabbitCatchMaster.json"
+    "generateTypes": "typechain --target=web3-v1  --out-dir ./typechain ../czodiac/packages/sc/artifacts/contracts/ChronoPoolService.sol/ChronoPoolService.json && typechain --target=web3-v1  --out-dir ./typechain ../czodiac/packages/sc/artifacts/contracts/ExoticMaster.sol/ExoticMaster.json"
   },
   "eslintConfig": {
     "extends": [

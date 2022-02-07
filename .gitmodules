@@ -1,0 +1,6 @@
+[submodule "hardhat"]
+	path = hardhat
+	url = https://github.com/shreedee/rabbit-catch.git
+[submodule "czodiac"]
+	path = czodiac
+	url = https://github.com/shreedee/czodiac.git

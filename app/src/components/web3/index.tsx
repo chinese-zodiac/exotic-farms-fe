@@ -7,8 +7,14 @@ import constate from 'constate';
 
 //the default chain needs to be the first One
 const supportedChains: ChainInfo[] = [
-    { chainId: '56', name: 'Binance Smart Chain', hexChainId: '0x38', rpcProvider: 'https://bsc-dataseed.binance.org/' },
-    { chainId: '97', name: 'bsc Testnet', hexChainId: '0x61', rpcProvider: 'https://data-seed-prebsc-1-s1.binance.org:8545/' }
+    { chainId: '56', name: 'Binance Smart Chain', hexChainId: '0x38', rpcProvider: 'https://bsc-dataseed.binance.org/', contracts:{
+        chronoPoolService:'0x5B11FB84ca9bBFA02894d7385bfD0d46F2D30843',
+        exoticMaster:'0x37E4dDAfF95d684E1443B5F18C81deD953B627dD',
+    } },
+    { chainId: '97', name: 'bsc Testnet', hexChainId: '0x61', rpcProvider: 'https://data-seed-prebsc-1-s1.binance.org:8545/',contracts:{
+        chronoPoolService:'0xcc2604AA5ab2D0fa7A177A39c6A29aEC17a06bA5',
+        exoticMaster:'0x26d36234aD95269a4318252d38B251b90c4f3A85',
+    }  }
 ];
 
 export const [Web3Provider,
@@ -20,6 +26,7 @@ export const [Web3Provider,
 
 function useWeb3() {
     const [ctx, setCtx] = useState<ConnectCtx & { chainInfo: ChainInfo, reconnecting?:boolean }>();
+    
 
     const connect = async (chainInfo: ChainInfo) => {
         const injected = new Injectedweb3();
@@ -124,15 +131,4 @@ export function ConnectWallet() {
     }
 
     return <div>ok </div>;
-
-
-
-    /*
-    return (
-        <div>
-          {`The current page is: ${qParams['network']||'unknown'}`}
-          
-        </div>
-    );
-    */
 }
