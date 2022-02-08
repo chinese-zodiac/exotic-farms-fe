@@ -10,13 +10,15 @@ import { TxModal, useAccountCtx, useConnectCalls, supportedChains, TxModelProp }
 import { CZFarm } from '../../typechain/CZFarm';
 import CZFarm_JSON from '../../typechain/CZFarm.json';
 
+import {useDisplayMode} from '../utils/display';
+
 
 function DisclaimerModal({ onClose }: {
   onClose: () => any;
 }) {
-
+  const {darkMode} = useDisplayMode();
   return <Modal show centered onHide={() => onClose && onClose()}
-      contentClassName="app-dark-mode disclaimerModel">
+      contentClassName={"disclaimerModel "+ (darkMode?'app-dark-mode':'app-light-mode')}>
 
       <Modal.Header closeButton>
           <Modal.Title>Disclaimer</Modal.Title>
@@ -99,6 +101,8 @@ export function Topbar() {
   const [connectAction, setConnectAction] = useState<IAsyncResult<TxModelProp>>();
 
   const [networkName,setNetworkName] = useState<string>('');
+
+  const {toggleDisplay, darkMode} = useDisplayMode();
 
   useEffect(() => {
 
@@ -204,7 +208,7 @@ export function Topbar() {
           Connect
         </Button>
 
-        <Button variant="secondary modeswitch" >
+        <Button variant="secondary modeswitch" onClick={()=>toggleDisplay()} >
           <div className="icon">&nbsp;</div>
         </Button>
 

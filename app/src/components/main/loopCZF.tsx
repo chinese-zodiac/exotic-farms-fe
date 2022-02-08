@@ -4,6 +4,8 @@ import {
     Modal, Nav, Form, Spinner
 } from 'react-bootstrap';
 
+import {useDisplayMode} from '../utils/display';
+
 
 export type PoolProps = { pId:number;duration: string; apr: number; czf: string; harvestable: string; } 
     &({type:'chronoPool'}|{type:'exoticfarm',lp:string;});
@@ -14,8 +16,10 @@ export function FastForwardModal({ onClose, onConfirm }: {
     onConfirm:()=>any;
 }) {
 
+    const {darkMode} = useDisplayMode();
+
     return <Modal show centered onHide={() => onClose && onClose()}
-        contentClassName="app-dark-mode fastForwardModal">
+        contentClassName={"fastForwardModal " + (darkMode?'app-dark-mode':'app-light-mode')}>
 
         <Modal.Header closeButton>
             <Modal.Title>Warning!</Modal.Title>
@@ -49,9 +53,11 @@ export function LoopModal({ onClose, onConfirm }: {
 
     const perVals = [25, 50, 75, 100];
     const [selectedPrtage, setSelectedPrtage] = useState(0);
+    const {darkMode} = useDisplayMode();
+
 
     return <Modal show centered onHide={() => onClose && onClose()}
-        contentClassName="app-dark-mode loopModal">
+        contentClassName={"loopModal " + (darkMode?'app-dark-mode':'app-light-mode')}>
 
         <Modal.Header closeButton>
             <Modal.Title>Loop CZF</Modal.Title>

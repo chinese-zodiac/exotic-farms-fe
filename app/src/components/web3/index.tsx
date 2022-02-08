@@ -11,6 +11,7 @@ import './web3.scss';
 import { ChainInfo, Injectedweb3, ConnectCtx } from './injected';
 import constate from 'constate';
 import Web3 from "web3";
+import {useDisplayMode} from '../utils/display';
 
 //the default chain needs to be the first One
 export const supportedChains: ChainInfo[] = [
@@ -144,8 +145,9 @@ export function TxModal({ txResult, onClose }: {
     onClose: () => any;
     txResult: IAsyncResult<TxModelProp>;
 }) {
+    const {darkMode} = useDisplayMode();
     return <Modal show centered onHide={() => !txResult.isLoading && onClose && onClose()}
-        contentClassName="app-dark-mode txModal">
+        contentClassName={"txModal "+ (darkMode?'app-dark-mode':'app-light-mode')}>
 
         <Modal.Header closeButton>
             <Modal.Title>{txResult.result ? 'Transaction Sent' : 'Sign Transaction'}</Modal.Title>

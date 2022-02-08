@@ -15,25 +15,34 @@ import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import { Topbar, BottomBar } from './components/navbars';
 import MainContent from './components/main';
 
+import { DisplayProvider, useDisplayMode } from './components/utils/display';
 
-export default function () {
+function WithMode() {
 
-  return <Web3Provider>
+  const {darkMode} = useDisplayMode();
 
-    <div className='app d-flex flex-column app-dark-mode'>
+  return <div className={'app d-flex flex-column ' + (darkMode?'app-dark-mode':'app-light-mode')}>
 
-      <Topbar />
+    <Topbar />
 
-      <div className="mainContentHolder py-5">
+    <div className="mainContentHolder py-5">
 
-        <div className='flex-grow-1 d-flex justify-content-center align-items-center'>
-          <MainContent />
-        </div>
-
-        <BottomBar />
-
+      <div className='flex-grow-1 d-flex justify-content-center align-items-center'>
+        <MainContent />
       </div>
 
+      <BottomBar />
+
     </div>
-  </Web3Provider>;
+
+  </div>;
+}
+
+
+export default function MainApp() {
+
+  return <Web3Provider><DisplayProvider>
+    <WithMode />
+
+  </DisplayProvider></Web3Provider>;
 };

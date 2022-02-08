@@ -1,4 +1,17 @@
-import {Modal} from 'react-bootstrap';
+import {useState} from 'react';
+
+import constate from 'constate';
+
+export const [DisplayProvider, useDisplayMode] =constate(useDisplay);
+
+function useDisplay(){
+    const [darkMode,setDarkModeOn] = useState(true);
+    const toggleDisplay = ()=>{
+        
+        setDarkModeOn(!darkMode)
+    };
+    return {darkMode,toggleDisplay};
+}
 
 
 export function ShowAddress({address}:{address:string}){
