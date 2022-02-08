@@ -78,5 +78,29 @@
         }
     }
 
+    .topBar{
+        .dropdown-menu{
+            background-color: #131314;
+
+            .dropdown-item{
+                display: flex;
+
+                &:hover, &:focus{
+                    background-color: #7d7d934f;
+                }
+
+                span{
+                    @include secondary-bg();
+                    color: white;
+                    border-radius: 0.25rem;
+                    text-align: center;
+                    flex-grow: 1;
+                }
+
+            }
+
+        }
+    }
+
 
 }

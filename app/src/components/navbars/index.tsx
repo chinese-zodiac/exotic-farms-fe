@@ -3,7 +3,7 @@ import { IAsyncResult, ShowError } from '../utils';
 
 import './topbar.scss';
 
-import { Button, Dropdown } from 'react-bootstrap';
+import { Button, Dropdown, Modal } from 'react-bootstrap';
 
 import { TxModal, useAccountCtx, useConnectCalls, supportedChains, TxModelProp } from '../web3';
 
@@ -11,24 +11,56 @@ import { CZFarm } from '../../typechain/CZFarm';
 import CZFarm_JSON from '../../typechain/CZFarm.json';
 
 
+function DisclaimerModal({ onClose }: {
+  onClose: () => any;
+}) {
+
+  return <Modal show centered onHide={() => onClose && onClose()}
+      contentClassName="app-dark-mode disclaimerModel">
+
+      <Modal.Header closeButton>
+          <Modal.Title>Disclaimer</Modal.Title>
+      </Modal.Header>
+
+      <Modal.Body className="text-center m-5">
+
+          <p>
+            Nothing on this site or on related channels should be considered a promise by anyone, including but not limited to the developers and promoters of this site, to perform work to generate profits for anyone including but not limited to the following: the users of this site; CZodiac community members; CZF holders; or anyone using any of the sites, smart contracts, social media channels, and any other media or tech related to CZF and CZodiac or any of the community members. Czodiac, CZF, cz.farm, and related technologies plus media are all experimental and must be used according to your personal financial situation and risk profile. There are no guarantees of profits, but the smart contracts are guaranteed to perform as written on the BSC blockchain.
+          </p>
+
+      </Modal.Body>
+
+      <Modal.Footer>
+          <Button variant="primary" onClick={()=>onClose()}>
+          Ok, got it!
+          </Button>
+      </Modal.Footer>
+
+  </Modal>;
+}
+
 export function BottomBar() {
 
+  const [showDisclaimer,setShowDisclaimer] = useState(true);
+
   const socials = [
-    { action: 'twitter' },
-    { action: 'telegram' },
-    { action: 'discord' },
-    { action: 'medium' },
-    { action: 'github' },
-    { action: 'image3' },
-    { action: 'image5' },
-    { action: 'image6' },
-    { action: 'image7' },
-    { action: 'bscScan' },
+    { action: 'twitter', url:'https://twitter.com/zodiacs_c' },
+    { action: 'telegram', url:'https://t.me/CZodiacANN' },
+    { action: 'discord', url:'https://discord.gg/FEpu3xF2Hb' },
+    { action: 'medium', url:'https://czodiacs.medium.com/' },
+    { action: 'github', url:'https://github.com/chinese-zodiac/czodiac' },
+    { action: 'image3', url:'' },
+    { action: 'image5', url:'' },
+    { action: 'image6', url:'' },
+    { action: 'image7', url:'' },
+    { action: 'bscScan', url:'' },
   ]
 
-  const dBtn = (<Button variant="link">Read our Disclaimer</Button>);
+  const dBtn = (<Button variant="link" onClick={()=>setShowDisclaimer(true)} >Read our Disclaimer</Button>);
 
   return <div className="mt-5 mb-1 bottomBar">
+
+    {showDisclaimer && <DisclaimerModal onClose={()=>setShowDisclaimer(false)} />}
 
     {/* only for xs */}
     <div className="d-block d-sm-none d-flex flex-row justify-content-around">
@@ -42,7 +74,7 @@ export function BottomBar() {
       <div className="d-none d-sm-block">CZodiac v0.11.9</div>
 
       <div className="d-flex flex-row soBtnHolder">
-        {socials.map((s, i) => <Button key={i} variant="link">
+        {socials.map((s, i) => <Button key={i} variant="link" onClick={()=>s.url && window.open(s.url)}>
           <div className={'soBtn ' + s.action}></div>
         </Button>)}
 
@@ -88,9 +120,7 @@ export function Topbar() {
 
         const { web3ro } = await readOnly();
 
-        const czFarm: CZFarm = new web3ro.eth.Contract(CZFarm_JSON.abi as any, chainInfo.contracts.czFarm) as any;
-
-        const currBalance_Wei = await czFarm.methods.balanceOf(account).call();
+        const currBalance_Wei = await web3ro.eth.getBalance(account);
 
         setCzfBalance({result:web3ro.utils.fromWei(currBalance_Wei)});
 
@@ -129,21 +159,25 @@ export function Topbar() {
           </Dropdown.Toggle>
 
           <Dropdown.Menu>
-            <Dropdown.Item href="#/action-1">Action</Dropdown.Item>
-            <Dropdown.Item href="#/action-2">Another action</Dropdown.Item>
-            <Dropdown.Item href="#/action-3">Something else</Dropdown.Item>
+            {czfBalance?.result &&<Dropdown.Item href="#"><span>CZF {czfBalance.result}</span></Dropdown.Item>}
+            <Dropdown.Item href="#"><span>PancakeSwap</span></Dropdown.Item>
+            <Dropdown.Item onClick={()=>window.open('https://app.1inch.io/#/56/swap/BNB/0x7c1608C004F20c3520f70b924E2BfeF092dA0043')}><span>1inch</span></Dropdown.Item>
+            <Dropdown.Item href="#"><span>Poocoin</span></Dropdown.Item>
           </Dropdown.Menu>
         </Dropdown>
 
         <Dropdown>
+
           <Dropdown.Toggle variant="secondary" id="dd-2">
             Socials
           </Dropdown.Toggle>
 
           <Dropdown.Menu>
-            <Dropdown.Item href="#/action-1">Action</Dropdown.Item>
-            <Dropdown.Item href="#/action-2">Another action</Dropdown.Item>
-            <Dropdown.Item href="#/action-3">Something else</Dropdown.Item>
+            <Dropdown.Item onClick={()=>window.open('https://twitter.com/zodiacs_c')} ><span>Twitter</span></Dropdown.Item>
+            <Dropdown.Item onClick={()=>window.open('https://t.me/CZodiacofficial')}><span>Telegram</span></Dropdown.Item>
+            <Dropdown.Item onClick={()=>window.open('https://discord.gg/FEpu3xF2Hb')}><span>Discord</span></Dropdown.Item>
+            <Dropdown.Item onClick={()=>window.open('https://czodiacs.medium.com/')}><span>Medium</span></Dropdown.Item>
+
           </Dropdown.Menu>
         </Dropdown>
 

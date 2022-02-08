@@ -84,7 +84,8 @@ export function ChronoPools({onCZAction,onPoolSelected}:{
         poolList={[pool]} 
         onPoolSelected={onPoolSelected}
         title="Chrono Pools" 
-        guidePrompt="Chrono Pool Guide" 
+        guidePrompt="Chrono Pool Guide"
+        guideURL="https://czodiac.gitbook.io/czodiac-litepapper/features-active/chrono-pools" 
     />;
 }
 
@@ -206,6 +207,8 @@ export function useLoadPools(){
                             const accInfo = await exoticMaster.methods.getExoticFarmAccountInfo(account,pId).call();
                             czf = web3ro.utils.fromWei( accInfo.emissionRate_);
                             harvestable= web3ro.utils.fromWei(accInfo.totalVesting_);
+
+                            
                         }
 
 
@@ -306,7 +309,9 @@ export function ExoticFarms({onCZAction}:{
     })||[];
 
     return <PoolsView poolList={poolList||[]} 
-        title="Exotic Farms" guidePrompt="Exotic Farms Guide" />;
+        title="Exotic Farms" guidePrompt="Exotic Farms Guide"  
+        guideURL='https://czodiac.gitbook.io/czodiac-litepapper/features-active/exotic-farms' 
+    />;
 }
 
 type PoolListProps =  {
@@ -316,8 +321,8 @@ type PoolListProps =  {
     pools: PoolProps[]
 };
 
-function PoolsView({ poolList, title, guidePrompt, onPoolSelected  }: {
-    title: string; guidePrompt: string;
+function PoolsView({ poolList, title, guidePrompt, guideURL, onPoolSelected  }: {
+    title: string; guidePrompt: string; guideURL:string;
     onPoolSelected?:(p:PoolProps)=>any;
     poolList: PoolListProps[]
 }) {
@@ -339,7 +344,7 @@ function PoolsView({ poolList, title, guidePrompt, onPoolSelected  }: {
         <div className="d-flex flex-row justify-content-between">
             <h4>{title}</h4>
 
-            <Button variant='link' >
+            <Button variant='link' onClick={()=>window.open(guideURL)}>
                 <span className="guide">{guidePrompt}</span>
             </Button>
         </div>

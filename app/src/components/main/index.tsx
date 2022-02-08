@@ -261,13 +261,13 @@ export default function MainContent() {
                 </p>
 
                 <div className="d-flex flex-row gap-1 social-how">
-                    <Button variant='link'>
+                    <Button variant='link' onClick={()=>window.open('https://czodiac.gitbook.io/czodiac-litepapper/')}>
                         <div className="icon-how btn-how-copy"></div>
                     </Button>
-                    <Button variant='link'>
+                    <Button variant='link' onClick={()=>window.open('https://t.me/CZodiacofficial')}>
                         <div className="icon-how btn-how-tele"></div>
                     </Button>
-                    <Button variant='link'>
+                    <Button variant='link' onClick={()=>window.open('https://discord.gg/FEpu3xF2Hb')}>
                         <div className="icon-how btn-how-discord"></div>
                     </Button>
                 </div>

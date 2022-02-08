@@ -24,6 +24,11 @@ export default function CZFView() {
   const { readOnly, connect } = useConnectCalls();
   const [czfBalance, setCzfBalance] = useState<IAsyncResult<string>>();
 
+  const [accounStat,setAccountStat] = useState<{
+    vested:number;
+    czf:number;
+  }>();
+
   const exoticPools = useExoticPools();
   const chronoPools = useChronoPools();
 
@@ -57,36 +62,33 @@ export default function CZFView() {
 
   useEffect(() => {
 
-    (async () => {
-      try {
+    const chainInfo = networkId && supportedChains.find(n => n.chainId == networkId) || undefined;
 
-        const chainInfo = networkId && supportedChains.find(n => n.chainId == networkId) || undefined;
+    if (!chainInfo || undefined === account || !chronoPools?.result || !exoticPools?.result) {
+      return;
+    }
 
-        if (!chainInfo || undefined === account || !chronoPools?.result || !exoticPools?.result) {
-          return;
-        }
+    const allPools = [...Object.keys(exoticPools.result).map(k => ((exoticPools.result || {})[k]).pools).flat(), ...chronoPools?.result];
 
-        const { web3ro } = await readOnly();
+    const vested = allPools.map(p => {
+      return p.harvestable ? Number.parseFloat(p.harvestable) : 0;
+    }).reduce((a, b) => a + b);
 
-        const exoticMaster: ExoticMaster = new web3ro.eth.Contract(ExoticMaster_JSON.abi as any, chainInfo.contracts.exoticMaster) as any;
-        const chronoPoolService: ChronoPoolService = new web3ro.eth.Contract(ChronoPoolService_JSON.abi as any, chainInfo.contracts.chronoPoolService) as any;
+    const czf = allPools.map(p => {
+      return p.czf ? Number.parseFloat(p.czf) : 0;
+    }).reduce((a, b) => a + b);
 
-        const ep= exoticPools?.result[0].pools[0];
+    setAccountStat({vested,czf});
 
-        const g = await exoticMaster.methods.getExoticFarmAccountInfo(account, ep.pId).call();
-
-
-      } catch (error: any) {
-        setCzfBalance({ error });
-      }
-
-    })();
-
-  }, [account, networkId, nounce,chronoPools?.result,exoticPools?.result]);
+  }, [account, networkId, nounce, chronoPools?.result, exoticPools?.result]);
 
 
-  const czfData = [{ val: czfBalance?.result || '', label: 'Your CZF' }, { val: '0.0000', label: 'CZF/day' },
-  { val: '0.0000', label: 'Harvestable CZF' }, { val: '0.0000', label: 'CZF Vesting' }];
+  const czfData = [
+      { val: czfBalance?.result || '', label: 'Your CZF' }, 
+      { val: accounStat?.czf||'', label: 'CZF/day' },
+      { val: '', label: 'Harvestable CZF' }, 
+      { val: accounStat?.vested||'', label: 'CZF Vesting' }
+  ];
 
 
   return <Row className="gap-3">
