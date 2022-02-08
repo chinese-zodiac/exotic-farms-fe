@@ -1,3 +1,9 @@
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/mixins";
+@import "~bootstrap/scss/utilities";
+
+
 .topBar {
   padding: 1.25rem 3rem;
 
@@ -35,6 +41,42 @@
       width: 2rem;
       height: 2rem;
 
+    }
+
+  }
+
+  .settings {
+    padding: 0.2rem;
+    display: block;
+
+    .dropdown-toggle{
+      &::after{
+        display: none;
+      }
+  
+    }
+
+    @include media-breakpoint-up(sm) {
+      display: none;
+    }
+
+    .icon {
+
+      background-image: url('./settings.png');
+      background-repeat: no-repeat;
+      background-size: contain;
+      background-position: center;
+      width: 2rem;
+      height: 2rem;
+
+    }
+
+  }
+
+  .lgOnly{
+    display: none;
+    @include media-breakpoint-up(sm) {
+      display: block;
     }
 
   }
