@@ -5,7 +5,7 @@ import './topbar.scss';
 
 import { Button, Dropdown } from 'react-bootstrap';
 
-import { TxModal, useAccountCtx, useConnectCalls, supportedChains } from '../web3';
+import { TxModal, useAccountCtx, useConnectCalls, supportedChains, TxModelProp } from '../web3';
 
 import { CZFarm } from '../../typechain/CZFarm';
 import CZFarm_JSON from '../../typechain/CZFarm.json';
@@ -64,7 +64,7 @@ export function Topbar() {
   const { account, networkId } = useAccountCtx();
   const { readOnly, connect } = useConnectCalls();
   const [czfBalance, setCzfBalance] = useState<IAsyncResult<string>>();
-  const [connectAction, setConnectAction] = useState<IAsyncResult<string>>();
+  const [connectAction, setConnectAction] = useState<IAsyncResult<TxModelProp>>();
 
   const [networkName,setNetworkName] = useState<string>('');
 

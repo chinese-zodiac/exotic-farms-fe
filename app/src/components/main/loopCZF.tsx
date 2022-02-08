@@ -5,7 +5,42 @@ import {
 } from 'react-bootstrap';
 
 
-export type PoolProps = { pId:number;duration: string; apr: number; czf: string; harvestable: string; };
+export type PoolProps = { pId:number;duration: string; apr: number; czf: string; harvestable: string; } 
+    &({type:'chronoPool'}|{type:'exoticfarm',lp:string;});
+
+
+export function FastForwardModal({ onClose, onConfirm }: {
+    onClose: () => any;
+    onConfirm:()=>any;
+}) {
+
+    return <Modal show centered onHide={() => onClose && onClose()}
+        contentClassName="app-dark-mode fastForwardModal">
+
+        <Modal.Header closeButton>
+            <Modal.Title>Warning!</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body className="text-center m-5">
+
+            <p>
+            FastForward will cancel all your future vesting! You will only get 75.00% of the CZF you staked. Read more info at czodiac.gitbook.io
+            </p>
+
+        </Modal.Body>
+
+        <Modal.Footer>
+            <Button variant="primary" onClick={()=>onConfirm()}>
+                OK
+            </Button>
+            <Button variant="secondary" onClick={() => onClose()}>
+                Cancel
+            </Button>
+        </Modal.Footer>
+
+    </Modal>;
+}
+
 
 export function LoopModal({ onClose, onConfirm }: {
     onClose: () => any;
@@ -56,9 +91,11 @@ export function LoopModal({ onClose, onConfirm }: {
     </Modal>;
 }
 
-export type CZActionProps ={
+export type CZActionProps ={pId:number;} & ({
     type:'loopCZF';
-    pId:number;
+
+    //we are looping exoticWith lp
+    exoticLp?:string;
 }|{
     type:'loopAllCZF';
 }|{
@@ -70,17 +107,29 @@ export type CZActionProps ={
 }|{
     type:'ff75';
 }|{
+    type:'ff75Confirmed';
+}|{
     type:'buyCZF';
 }|{
     type:'loopCZFConfirmed';
-    pId:number;
-    percentage:number;
-};
+    percentage?:number;
+    amountEth?:string;
+    exoticLp?:string;
+}|{
+    type:'harvestCZF-lp';
+}|{
+    type:'ff75-lp';
+}|{
+    type:'ff75-lp-confirmed';
+}
+);
 
 export function LoopCZF({onCZAction, selectedPool}:{
     onCZAction:(props:CZActionProps)=>any;
     selectedPool?:PoolProps;
 }) {
+
+    const [loopAmount,setLoopAmount] = useState<string>();
 
     if(!selectedPool){
         return <div className="bg-secondary-mod text-center p-4">
@@ -106,8 +155,20 @@ export function LoopCZF({onCZAction, selectedPool}:{
             <Col md >
 
                 <InputGroup className="m-2">
-                    <FormControl
-                        placeholder="0.0"
+                    <FormControl required placeholder="0.0"
+                        value={loopAmount||''}
+
+                        onChange={e => {
+
+                            if (!e.target.value) {
+                                setLoopAmount(undefined);
+                                return;
+                            } else {
+                                const amount = e.target.value.replace(/[^0-9$.,]/g, '');
+                                setLoopAmount(amount);
+                            }
+                        }}
+
                     />
                     <InputGroup.Text id="basic-addon2">CZF</InputGroup.Text>
                 </InputGroup>
@@ -117,14 +178,20 @@ export function LoopCZF({onCZAction, selectedPool}:{
             <Col md>
 
                 <div className="d-flex flex-row gap-2 m-2">
-                    <Button variant='primary' className="flex-grow-1" onClick={() => onCZAction({
-                        type:'loopCZF',
-                        pId:selectedPool.pId
+                    <Button variant='primary' disabled={!loopAmount}  className="flex-grow-1" onClick={() => onCZAction({
+                        type:'loopCZFConfirmed',
+                        pId:selectedPool.pId,
+                        amountEth:loopAmount
                     })}>
                         Loop CZF
                     </Button>
 
-                    <Button variant='secondary'>
+                    <Button variant='secondary' onClick={() => {
+                        try{
+                            const current = Number.parseFloat(loopAmount||'0');
+                            setLoopAmount((current+1).toString());
+                        }catch{}
+                    }}>
                         +CZF
                     </Button>
 
@@ -135,13 +202,20 @@ export function LoopCZF({onCZAction, selectedPool}:{
 
         <Row className="my-3">
             <Col md className="d-flex">
-                <Button variant="light" size="lg" className="flex-grow-1 m-2">
+                <Button variant="light" size="lg" className="flex-grow-1 m-2" onClick={() => onCZAction({
+                        type:'harvestAll',
+                        pId:selectedPool.pId
+                    })}>
                     Harvest All
                 </Button>
             </Col>
 
             <Col md className="d-flex">
-                <Button variant="light" size="lg" className="flex-grow-1 m-2">
+                <Button variant="light" size="lg" className="flex-grow-1 m-2" onClick={() => onCZAction({
+                        type:'loopCZFConfirmed',
+                        percentage:100,
+                        pId:selectedPool.pId
+                    })}>
                     Loop All CZF
                 </Button>
             </Col>

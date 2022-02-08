@@ -5,6 +5,7 @@ export type ChainInfo = {
     name: string;
     hexChainId: string;
     rpcProvider: string;
+    explorer: string;
     contracts:{
         chronoPoolService:string;
         exoticMaster:string;
