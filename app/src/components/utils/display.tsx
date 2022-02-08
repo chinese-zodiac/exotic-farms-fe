@@ -1,4 +1,4 @@
-
+import {Modal} from 'react-bootstrap';
 
 
 export function ShowAddress({address}:{address:string}){
@@ -13,4 +13,10 @@ export function ShowAddress({address}:{address:string}){
         <span>{begin}...{end}</span>
 
     </div>;
+}
+
+export function TrModel(){
+
+    return <div></div>;
+
 }

@@ -48,6 +48,12 @@
             background-position: center;
     }
 
+    .poolViewActions{
+        .btn{
+            width: 90%;
+        }
+    }
+
 
 }
 
@@ -57,5 +63,10 @@
             background-image: url('./diagonal-up.png');
     
         }
+
+        .poolViewActions{
+            border-top: 0.2rem solid white;
+        }
+    
     }
 }

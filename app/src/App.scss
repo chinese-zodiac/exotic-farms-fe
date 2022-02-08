@@ -1,17 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
 @import "./darkMode.scss";
 
-.app{
-  height: 100vh;
-  
+@mixin app-styles {
   /*mix-blend-mode: multiply;  bad prop in figma */
-
   font-family: Poppins, sans-serif;
-
-  background-color: rgba(6, 0, 11, 0.88);
-  color: white;
-
-
   .btn{
     border-radius: 50rem;
   }
@@ -19,7 +11,38 @@
   .bg-light-mod, .bg-secondary-mod, .bg-secondary-mod-1{
     border-radius: 1rem;
   }
+  
+}
 
+.app{
+  @include app-styles();
+  height: 100vh;
+}
+
+.modal-content{
+
+  @include app-styles();
+  
+  .btn-close{
+    margin: -2.9rem -1.2rem -0.5rem auto;
+    border-radius: 1.25rem;
+    position: absolute;
+    right: 1rem;
+  }
+
+  .modal-footer{
+    justify-content: center;
+    border-top: 0;
+
+    .btn{
+      padding: 0.3rem 2rem 0.2rem;
+    }
+  }
+
+  .modal-header{
+    border-bottom: 0;
+    justify-content: center;
+  }
 }
 
 

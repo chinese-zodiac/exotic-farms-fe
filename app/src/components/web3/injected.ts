@@ -8,6 +8,7 @@ export type ChainInfo = {
     contracts:{
         chronoPoolService:string;
         exoticMaster:string;
+        czFarm:string;
     }
 }
 
@@ -21,7 +22,6 @@ export type ConnectCtx ={
 export class Injectedweb3 {
 
     readonly injected: any = undefined;
-   
 
     constructor() {
 

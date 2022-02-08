@@ -1,4 +1,4 @@
-.app-dark-mode{
+.app-dark-mode {
 
     @mixin rounded-lght{
         background-color: transparent;
@@ -14,6 +14,11 @@
         color: white;
         background-color: #0E0E0E;
         border-color: #cccccc91;
+    }
+
+    &.app{
+        background-color: rgba(6, 0, 11, 0.88);
+        color: white;
     }
       
 
@@ -60,6 +65,17 @@
 
     .input-group-text{
         @include inputs-colors;
+    }
+
+    &.modal-content{
+        background-color: #404243;
+        color: white;
+
+        .btn-close{
+            color: white;
+            background-image: url('./components/navbars/close.png');
+            background-color: #131314;
+        }
     }
 
 

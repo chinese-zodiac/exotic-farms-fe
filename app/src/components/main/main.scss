@@ -56,3 +56,17 @@
 
 
 }
+
+.loopModal{
+    .nav{
+        .nav-link{
+            color: #cccccc;
+            border-radius: 1.25rem;
+
+            &.active{
+                background-color: white;
+                color: black;
+            }
+        }
+    }
+}
