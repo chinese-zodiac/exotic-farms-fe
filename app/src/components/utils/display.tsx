@@ -1,6 +1,18 @@
 import {useState} from 'react';
-
 import constate from 'constate';
+
+import numeral from 'numeral';
+
+export function formatCZfVal(value?:string|number){
+
+    var myNumeral = numeral(value||'0');
+    const valNumber = myNumeral.value();
+    const formatStr = (valNumber && valNumber>=1)?'0.[000]a':'0.0[0000]';
+    
+    const formated = myNumeral.format(formatStr);
+
+    return formated;
+}
 
 export const [DisplayProvider, useDisplayMode] =constate(useDisplay);
 

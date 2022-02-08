@@ -4,6 +4,8 @@ import { Button, Spinner, Row, Col } from 'react-bootstrap';
 import './chronoPools.scss';
 import { useConnectCalls, useAccountCtx } from '../web3';
 
+import {formatCZfVal} from '../utils/display';
+
 import { ChronoPoolService } from '../../typechain/ChronoPoolService';
 import ChronoPoolService_JSON from '../../typechain/ChronoPoolService.json';
 
@@ -386,12 +388,12 @@ function PoolsView({ poolList, title, guidePrompt, guideURL, onPoolSelected  }: 
 
                     <div className="flex-grow-1 text-center">
                         <small>Est. CZF/day</small>
-                        <h5>{p.czf}</h5>
+                        <h5>{formatCZfVal(p.czf)}</h5>
                     </div>
 
                     <div className="flex-grow-1 text-center">
                         <small>Est. Harvestable</small>
-                        <h5>{p.harvestable}</h5>
+                        <h5>{formatCZfVal(p.harvestable)}</h5>
                     </div>
 
                     <Button variant='link' onClick={() => {

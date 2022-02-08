@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { IAsyncResult, ShowError } from '../utils';
+import { IAsyncResult } from '../utils';
 
 import './topbar.scss';
 
@@ -7,10 +7,7 @@ import { Button, Dropdown, Modal } from 'react-bootstrap';
 
 import { TxModal, useAccountCtx, useConnectCalls, supportedChains, TxModelProp } from '../web3';
 
-import { CZFarm } from '../../typechain/CZFarm';
-import CZFarm_JSON from '../../typechain/CZFarm.json';
-
-import { useDisplayMode } from '../utils/display';
+import { useDisplayMode, formatCZfVal } from '../utils/display';
 
 
 function DisclaimerModal({ onClose }: {
@@ -166,7 +163,7 @@ export function Topbar() {
       <div className='d-flex flex-row gap-1'>
 
         {czfBalance?.result && <Button variant="light" className="lgOnly">
-          {czfBalance.result}
+          {formatCZfVal(czfBalance.result)}
         </Button>
         }
 
@@ -198,7 +195,7 @@ export function Topbar() {
 
         {connectAction && <TxModal txResult={connectAction} onClose={() => setConnectAction(undefined)} />}
 
-        <Button variant="primary" onClick={async () => {
+        <Button variant="primary" disabled={!!account} onClick={async () => {
           try {
             setConnectAction({ isLoading: true });
 

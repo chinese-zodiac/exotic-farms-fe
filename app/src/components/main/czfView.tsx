@@ -1,18 +1,12 @@
 
 import { useState, useEffect } from 'react';
-import { useAccountCtx, Web3Provider, supportedChains, useConnectCalls, TxModal, TxModelProp } from '../web3';
+import { useAccountCtx, supportedChains, useConnectCalls } from '../web3';
 import './main.scss';
-import { Row, Col, Spinner, Button } from "react-bootstrap";
+import { Row, Col, Spinner } from "react-bootstrap";
 
-import { LoopCZF, LoopModal, PoolProps, CZActionProps, FastForwardModal } from './loopCZF';
+import {formatCZfVal} from '../utils/display';
 import { useExoticPools, useChronoPools } from '../pools';
-import { IAsyncResult, ShowError } from '../utils';
-
-import { ChronoPoolService } from '../../typechain/ChronoPoolService';
-import ChronoPoolService_JSON from '../../typechain/ChronoPoolService.json';
-
-import { ExoticMaster } from '../../typechain/ExoticMaster';
-import ExoticMaster_JSON from '../../typechain/ExoticMaster.json';
+import { IAsyncResult } from '../utils';
 
 
 import { CZFarm } from '../../typechain/CZFarm';
@@ -84,10 +78,10 @@ export default function CZFView() {
 
 
   const czfData = [
-      { val: czfBalance?.result || '', label: 'Your CZF' }, 
-      { val: accounStat?.czf||'', label: 'CZF/day' },
+      { val: formatCZfVal(czfBalance?.result), label: 'Your CZF' }, 
+      { val: formatCZfVal(accounStat?.czf), label: 'CZF/day' },
       { val: '', label: 'Harvestable CZF' }, 
-      { val: accounStat?.vested||'', label: 'CZF Vesting' }
+      { val: formatCZfVal(accounStat?.vested), label: 'CZF Vesting' }
   ];
 
 
