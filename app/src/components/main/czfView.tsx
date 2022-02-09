@@ -65,11 +65,22 @@ export default function CZFView() {
 
     const allPools = [...Object.keys(exoticPools.result).map(k => ((exoticPools.result || {})[k]).pools).flat(), ...chronoPools?.result];
 
-    const harvastable = allPools.map(p => p.harvestableFn()).reduce((a, b) => a + b);
     const czfPerDay = allPools.map(p => p.czfPerDay).reduce((a, b) => a + b);
     const vested = allPools.map(p => p.vested).reduce((a, b) => a + b);
 
-    setAccountStat({vested,czfPerDay,harvastable});
+    setAccountStat({vested,czfPerDay,harvastable:0});
+
+    const harvestTimer = setInterval(()=>{
+      
+      const harvastable = allPools.map(p => p.harvestableFn()).reduce((a, b) => a + b);
+      accounStat && setAccountStat({...accounStat,harvastable});
+
+      //console.debug(`harv updated : ${harvastable}`);
+    },1000);
+
+    return ()=>{
+      clearInterval(harvestTimer);
+    }
 
   }, [account, networkId, nounce, chronoPools?.result, exoticPools?.result]);
 

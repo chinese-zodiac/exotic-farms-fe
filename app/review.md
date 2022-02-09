@@ -3,7 +3,7 @@ General:
 
 `done` - When displaying CZF numbers, never show more than 5 digits of precision and use letter shorthand (eg: 10.402k or 490.21m, or 10.323)
 
-- Update harvestable displays every second
+`done` - Update harvestable displays every second
 
 `already working. let me know if there's a bug` -  Update CZF displays whenever a transaction is completed
 

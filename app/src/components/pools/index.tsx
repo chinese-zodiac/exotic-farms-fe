@@ -441,9 +441,29 @@ type PoolListProps = {
     pools: PoolProps[]
 };
 
+
+function EstHarvest({p}:{
+    p:PoolProps;
+}){
+    const [estHarv,setEstHarv] = useState('');
+    useEffect(()=>{
+
+        const harvestTimer = setInterval(()=>{
+            setEstHarv(formatCZfVal(p.harvestableFn()));
+            //console.debug(`harv updated : ${harvastable}`);
+          },1000);
+      
+          return ()=>{
+            clearInterval(harvestTimer);
+          }
+      
+    },[p]);
+    return <h5>{estHarv}</h5>;
+}
+
+
 function PoolsView({ poolList, title, guidePrompt, guideURL }: {
     title: string; guidePrompt: string; guideURL: string;
-    
     poolList: PoolListProps[]
 }) {
 
@@ -456,7 +476,6 @@ function PoolsView({ poolList, title, guidePrompt, guideURL }: {
                 setExpandedpId(poolList[0].pools[0].pId);
             }
         }
-
     }, [poolList]);
 
     return <div className="bg-secondary-mod-1 poolsView p-3">
@@ -511,7 +530,7 @@ function PoolsView({ poolList, title, guidePrompt, guideURL }: {
 
                     <div className="flex-grow-1 text-center">
                         <small>Est. Harvestable</small>
-                        <h5>{formatCZfVal(p.harvestableFn())}</h5>
+                        <EstHarvest p={p}/>
                     </div>
 
                     <Button variant='link' onClick={() => {
