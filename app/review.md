@@ -7,21 +7,21 @@ General:
 
 `already working. let me know if there's a bug` -  Update CZF displays whenever a transaction is completed
 
-`done`- Automatically connect wallet when possible
+`done` - Automatically connect wallet when possible
 
-`done`- Light/dark mode: fix the gradient to match figma, especially light mode
-`done`- Light mode: add the shadows from figma for elements were applicable
+`done` - Light/dark mode: fix the gradient to match figma, especially light mode
+`done` - Light mode: add the shadows from figma for elements were applicable
 
 
-Header: Display current CZF price rather than wallet CZF balance (refer to figma)
+`done` - Header: Display current CZF price rather than wallet CZF balance (refer to figma)
 
 CZF top stats bar: 
 `bg color is fixed: Font is Poppins`- Fix background color and fonts to match Figma
 
-- Display "Harvestable CZF" as sum of all harvestable from both chrono pools and exotic farms
+`?? How do we get CZF price`- Display "Harvestable CZF" as sum of all harvestable from both chrono pools and exotic farms
 
 Chrono Farmer Image:
-``??? not sure what to do here` - Fix spacing to match documentation. Should be more than half of screen.
+`??? not sure what to do here` - Fix spacing to match documentation. Should be more than half of screen.
 
 "Loop CZF For High Yield" section:
 `??? SHOULD THIS be is sync with chronoPools`- The time selection should be a dropdown allowing selecting the proper chrono pool, as shown in Figma with the dropdown arrow to the left of "1 YEAR"
@@ -35,7 +35,7 @@ Transaction Modal
 `done, we cannot cancel the tx`- Fix (X) and (Close) buttons to correctly close the modal when transaction is pending
 
 Chrono/Exotic Accordions:
-``??? I DON"T UNDERSTAND`- When clicking on an item in the Accordion, any open items should stay open and the clicked item should close.
+`??? I DON"T UNDERSTAND`- When clicking on an item in the Accordion, any open items should stay open and the clicked item should close.
 
 Exotic Farms
 `done` - The CZF/BNB on PCS and CZF/BUSD links in Exotic Farms should link to the mint LP pages on pancakeswap:
@@ -51,3 +51,14 @@ app.1inch.io
 1inch - DeFi / DEX aggregator on Ethereum, Binance Smart Chain, Optimism, Polygon, Arbitrum
 
 DeFi / DEX aggregator with the most liquidity and the best rates on Ethereum, Binance Smart Chain, Optimism, Polygon, 1inch dApp is an entry point to the 1inch Network's ...
+
+
+---
+1. sort the pools by duration
+2. anything with 0 APR hiden them
+3. the loops czf box lives on it's own
+4. Round UP the durations
+
+5. footer icons are pixelated 
+
+//https://ethereum.stackexchange.com/questions/112957/getting-uniswap-v2-eth-usdc-price-from-reserves-with-web3

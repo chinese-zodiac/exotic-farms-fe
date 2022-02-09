@@ -3,11 +3,14 @@ import { IAsyncResult } from '../utils';
 
 import './topbar.scss';
 
-import { Button, Dropdown, Modal } from 'react-bootstrap';
+import { Button, Dropdown, Modal, Spinner } from 'react-bootstrap';
 
 import { TxModal, useAccountCtx, useConnectCalls, supportedChains, TxModelProp } from '../web3';
 
 import { useDisplayMode, formatCZfVal } from '../utils/display';
+
+import PAIR_ABI from '../../typechain/pair.json';
+const PCS_CZF_CZUSD_PAIR = '0x98b5F5E7Ec32cda1F3E89936c9972f92296aFE47';
 
 
 function DisclaimerModal({ onClose }: {
@@ -94,7 +97,7 @@ export function Topbar() {
 
   const { account, networkId } = useAccountCtx();
   const { readOnly, connect } = useConnectCalls();
-  const [czfBalance, setCzfBalance] = useState<IAsyncResult<string>>();
+  const [czfPrice, setCzfPrice] = useState<IAsyncResult<string>>();
   const [connectAction, setConnectAction] = useState<IAsyncResult<TxModelProp>>();
 
   const [networkName, setNetworkName] = useState<string>('');
@@ -113,35 +116,38 @@ export function Topbar() {
           setNetworkName(chainInfo?.name || '');
         }
 
-        if (!chainInfo || undefined === account) {
+        if (!chainInfo) {
           return;
         }
 
-        setCzfBalance({ isLoading: true });
+        setCzfPrice({ isLoading: true });
 
         const { web3ro } = await readOnly();
 
-        const currBalance_Wei = await web3ro.eth.getBalance(account);
+        
+        var pair = new web3ro.eth.Contract(PAIR_ABI as any, PCS_CZF_CZUSD_PAIR);
+        var reserves:{
+          _reserve0: string;
+          _reserve1:string;
+        } = await pair.methods.getReserves().call();
 
-        setCzfBalance({ result: web3ro.utils.fromWei(currBalance_Wei) });
+        const resCzf = Number.parseFloat( web3ro.utils.fromWei(reserves._reserve0));
+        const resCzUSD = Number.parseFloat( web3ro.utils.fromWei(reserves._reserve1));
+
+        const result = ((resCzf>0 && resCzUSD>0 && resCzUSD/resCzf) || 0).toFixed(10);
+
+        setCzfPrice({ result });
 
       } catch (error: any) {
-        setCzfBalance({ error });
+        setCzfPrice({ error });
       }
 
     })();
 
-  }, [account, networkId]);
-
-
-
-  /*
-  if (!web3Ctx?.account)
-    return null;
-  */
+  }, [networkId]);
 
   const menu1 = <>
-            {czfBalance?.result && <Dropdown.Item href="#"><span>CZF {czfBalance.result}</span></Dropdown.Item>}
+            {czfPrice?.result && <Dropdown.Item href="#"><span>CZF {czfPrice.result}</span></Dropdown.Item>}
             <Dropdown.Item href="#"><span>PancakeSwap</span></Dropdown.Item>
             <Dropdown.Item onClick={() => window.open('https://app.1inch.io/#/56/swap/BNB/0x7c1608C004F20c3520f70b924E2BfeF092dA0043')}><span>1inch</span></Dropdown.Item>
             <Dropdown.Item href="#"><span>Poocoin</span></Dropdown.Item>
@@ -162,10 +168,11 @@ export function Topbar() {
 
       <div className='d-flex flex-row gap-1'>
 
-        {czfBalance?.result && <Button variant="light" className="lgOnly">
-          {formatCZfVal(czfBalance.result)}
+        <Button variant="light" className="lgOnly">
+          {czfPrice?.isLoading && <Spinner animation="border" variant="info" size="sm" />}
+          {czfPrice?.result}
         </Button>
-        }
+        
 
         <Dropdown className="lgOnly">
           <Dropdown.Toggle variant="secondary" id="dd-1">
