@@ -20,14 +20,17 @@ import {CZActionProps, PoolProps} from '../main/loopCZF';
 const _lpDefination:{[lp:string]:{
     title: string;
     cashLogo: string;
+    guideUrl: string ;
 }} ={
     '0xeF8e8CfADC0b634b6d0065080a69F139159a17dE':{
         title: 'CZF/BNB on PCS',
         cashLogo: 'bnbLogo',
+        guideUrl: 'https://pancakeswap.finance/add/0x7c1608C004F20c3520f70b924E2BfeF092dA0043/BNB'
     },
     '0xAAC96d00C566571bafdfa3B8440Bdc3cDB223Ad0':{
         title: 'CZF/BUSD on PCS',
         cashLogo: 'busdLogo',
+        guideUrl: 'https://pancakeswap.finance/add/0x7c1608C004F20c3520f70b924E2BfeF092dA0043/0xe9e7cea3dedca5984780bafc599bd69add087d56'
     }
 }
 
@@ -92,9 +95,12 @@ export function ChronoPools({onCZAction,onPoolSelected}:{
 }
 
 function durationFromSeconds(vestPeriod_:string){
+
     const m_duration = moment.duration(vestPeriod_, 'seconds');
 
-    let duration = `${m_duration.asDays()} DAYS`;
+    const durationDays =m_duration.asDays(); 
+
+    let duration = `${durationDays} DAYS`;
     const years = Math.floor(m_duration.asYears());
     const months = Math.floor(m_duration.asMonths());
     if (years > 1) {
@@ -107,7 +113,7 @@ function durationFromSeconds(vestPeriod_:string){
         duration = '1 MONTH';
     }
 
-    return duration;
+    return {duration, durationDays};
 }
 
 export const [PoolsProvider,
@@ -140,7 +146,7 @@ export function useLoadPools(){
                     try {
                         const pool = await chronoPoolService.methods.getChronoPoolInfo(pId).call();
 
-                        const duration = durationFromSeconds(pool.vestPeriod_);
+                        const {duration, durationDays}= durationFromSeconds(pool.vestPeriod_);
                         const apr = Number.parseInt(pool.adjustedRateBasis_) / 100.0;
 
                         let czf = '';
@@ -151,7 +157,7 @@ export function useLoadPools(){
                             harvestable= web3ro.utils.fromWei(accInfo.totalVesting_);
                         }
 
-                        result.push({ type:'chronoPool', pId, duration, apr, czf, harvestable });
+                        result.push({ type:'chronoPool', pId, duration,durationDays, apr, czf, harvestable });
 
                     } catch (error: any) {
 
@@ -200,7 +206,7 @@ export function useLoadPools(){
                         
                         const pool = await exoticMaster.methods.getExoticFarmInfo(pId).call();
 
-                        const duration = durationFromSeconds(pool.vestPeriod_);
+                        const {duration, durationDays} = durationFromSeconds(pool.vestPeriod_);
                         const apr = Number.parseInt(pool.adjustedRateBasis_) / 100.0;
 
                         let czf = '';
@@ -228,7 +234,7 @@ export function useLoadPools(){
                             };
                         }
                         
-                        poolsMap[pool.lp_].pools.push({type:'exoticfarm',lp:pool.lp_, pId, duration, apr, czf, harvestable });
+                        poolsMap[pool.lp_].pools.push({type:'exoticfarm',lp:pool.lp_, pId, duration,durationDays, apr, czf, harvestable });
 
                     } catch (error: any) {
 
@@ -318,6 +324,7 @@ export function ExoticFarms({onCZAction}:{
 
 type PoolListProps =  {
     title?: string;
+    guideUrl?:string;
     cashLogo?: string;
     actions?: { label: string, action:(p:PoolProps)=>any }[]
     pools: PoolProps[]
@@ -355,7 +362,7 @@ function PoolsView({ poolList, title, guidePrompt, guideURL, onPoolSelected  }: 
 
             {pl.title && <div className='mt-4 mb-2 d-flex flex-row gap-2 align-items-center'>
                 <h5 className="pt-2">{pl.title}</h5>
-                <Button variant='link' >
+                <Button variant='link' onClick={()=>pl.guideUrl && window.open(pl.guideUrl)} >
                     <span className="guide">{pl.title}</span>
                 </Button>
             </div>}

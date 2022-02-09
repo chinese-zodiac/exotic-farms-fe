@@ -4,6 +4,84 @@
 @import "~bootstrap/scss/utilities";
 
 
+.app-light-mode {
+  .topBar {
+    .modeswitch {
+      .icon {
+        background-image: url('./sun.png');
+      }
+    }
+  }
+
+  .bottomBar{
+    
+    .twitter{
+      background-image: url('./twiitter-l.png');
+    }
+
+    .telegram{
+      background-image: url('./telegram-l.png');
+    }
+
+    .discord{
+      background-image: url('./discord-negative-l.png');
+    }
+
+    .medium{
+      background-image: url('./medium-l.png');
+    }
+
+    .github{
+      background-image: url('./github-1-l.png');
+    }
+
+    .bscScan{
+      background-image: url('./logo-bscscan-1-l.png');
+    }
+
+}
+}
+
+.app-dark-mode {
+  .topBar {
+    .modeswitch {
+      .icon {
+        background-image: url('./moon.png');
+      }
+    }
+  }
+
+  .bottomBar{
+
+      .twitter{
+        background-image: url('./twiitter.png');
+      }
+  
+      .telegram{
+        background-image: url('./telegram.png');
+      }
+  
+      .discord{
+        background-image: url('./discord-negative.png');
+      }
+  
+      .medium{
+        background-image: url('./medium.png');
+      }
+  
+      .github{
+        background-image: url('./github-1.png');
+      }
+  
+      .bscScan{
+        background-image: url('./logo-bscscan-1.png');
+      }
+  
+  }
+  
+}
+
+
 .topBar {
   padding: 1.25rem 3rem;
 
@@ -34,7 +112,7 @@
 
     .icon {
 
-      background-image: url('./moon.png');
+      
       background-repeat: no-repeat;
       background-size: contain;
       background-position: center;
@@ -92,50 +170,32 @@
       width: 2rem;
       height: 2rem;
     }
-  
-    .twitter{
-      background-image: url('./twiitter.png');
-    }
-
-    .telegram{
-      background-image: url('./telegram.png');
-    }
-
-    .discord{
-      background-image: url('./discord-negative.png');
-    }
-
-    .medium{
-      background-image: url('./medium.png');
-    }
-
-    .github{
-      background-image: url('./github-1.png');
-    }
-
-    .image3{
-      background-image: url('./image-3.png');
-    }
-
-    .image5{
-      background-image: url('./image-5.png');
-    }
-
-    .image6{
-      background-image: url('./image-6.png');
-    }
-
-    .image7{
-      background-image: url('./image-7.png');
-    }
-
-    .bscScan{
-      background-image: url('./logo-bscscan-1.png');
-    }
-
-
+ 
   }
 
-  
+  .image3{
+    background-image: url('./image-3.png');
+  }
 
+  .image5{
+    background-image: url('./image-5.png');
+  }
+
+  .image6{
+    background-image: url('./image-6.png');
+  }
+
+  .image7{
+    background-image: url('./image-7.png');
+  }
+
+
+
+}
+
+.disclaimerModel{
+  max-width: 23rem;
+  .modal-body{
+    padding: 0rem 1rem;
+  } 
 }

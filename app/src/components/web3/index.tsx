@@ -166,14 +166,14 @@ export function TxModal({ txResult, onClose }: {
     txResult: IAsyncResult<TxModelProp>;
 }) {
     const { darkMode } = useDisplayMode();
-    return <Modal show centered onHide={() => !txResult.isLoading && onClose && onClose()}
+    return <Modal show centered onHide={() => onClose && onClose()}
         contentClassName={"txModal " + (darkMode ? 'app-dark-mode' : 'app-light-mode')}>
 
         <Modal.Header closeButton>
             <Modal.Title>{txResult.result ? 'Transaction Sent' : 'Sign Transaction'}</Modal.Title>
         </Modal.Header>
 
-        <Modal.Body className="m-5">
+        <Modal.Body>
 
             <div className="d-flex flex-column align-items-center">
 
@@ -208,7 +208,7 @@ export function TxModal({ txResult, onClose }: {
             </Button>
             }
 
-            <Button variant="secondary" disabled={!!txResult.isLoading} onClick={() => !txResult.isLoading && onClose && onClose()}>
+            <Button variant="secondary"  onClick={() =>  onClose && onClose()}>
                 Close
             </Button>
 

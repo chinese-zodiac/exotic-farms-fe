@@ -1,55 +1,57 @@
-.poolsView{
+.poolsView {
 
-    .guide{
+    .guide {
         background-repeat: no-repeat;
         background-position: right;
         background-size: contain;
         padding-right: 1.5rem;
     }
 
-    .cashLogo{
+    .cashLogo {
         margin-left: -0.5rem;
     }
 
-    .poolLogo{
+    .poolLogo {
 
         padding: 0.25rem;
         display: inline-block;
 
-        .logo, .bnbLogo, .busdLogo {
+        .logo,
+        .bnbLogo,
+        .busdLogo {
             width: 1.875rem;
-            height: 1.875rem; 
-            
+            height: 1.875rem;
+
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
         }
 
-        .bnbLogo{
+        .bnbLogo {
             background-image: url('./binance-coin-bnb.png');
         }
 
-        .busdLogo{
+        .busdLogo {
             background-image: url('./binance-usd-busd.png');
         }
 
-        .logo{
+        .logo {
             background-image: url('./czodiac-token.png');
         }
+
+    }
+
+    .poolBtn {
+        width: 3rem;
+        height: 3rem;
         
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
     }
 
-    .poolBtn{
-            width: 3rem;
-            height: 3rem; 
-            background-image: url('./arrow_right.png');
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-    }
-
-    .poolViewActions{
-        .btn{
+    .poolViewActions {
+        .btn {
             width: 90%;
         }
     }
@@ -57,16 +59,40 @@
 
 }
 
-.app-dark-mode{
-    .poolsView{
-        .guide{
+.app-dark-mode {
+
+    .poolsView {
+        .guide {
             background-image: url('./diagonal-up.png');
-    
+
         }
 
-        .poolViewActions{
+        .poolViewActions {
             border-top: 0.2rem solid white;
         }
-    
+
+        .poolBtn{
+            background-image: url('./arrow_right.png');
+        }
+
+    }
+}
+
+.app-light-mode {
+    .poolsView {
+        .guide {
+            background-image: url('./diagonal-up-light.png');
+
+        }
+
+        .poolViewActions {
+            border-top: 0.2rem solid rgba(0, 0, 0, 0.15);
+        }
+
+        .poolBtn{
+            background-image: url('./arrow_right-1.png');
+        }
+
+
     }
 }

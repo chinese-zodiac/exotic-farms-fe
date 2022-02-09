@@ -7,7 +7,7 @@ import {
 import {useDisplayMode} from '../utils/display';
 
 
-export type PoolProps = { pId:number;duration: string; apr: number; czf: string; harvestable: string; } 
+export type PoolProps = { pId:number;duration: string; durationDays: number; apr: number; czf: string; harvestable: string; } 
     &({type:'chronoPool'}|{type:'exoticfarm',lp:string;});
 
 
@@ -143,11 +143,11 @@ export function LoopCZF({onCZAction, selectedPool}:{
         </div>;
     }
 
-    const roi = selectedPool.apr+'%';
+    const roi = (selectedPool.apr * (selectedPool.durationDays/365)).toFixed(2) +'%';
 
     return <div className="bg-secondary-mod text-center p-4">
 
-        <h4>Loop CZF for {roi} APR</h4>
+        <h4>Loop CZF for {selectedPool.apr} APR</h4>
 
         <div className="d-flex flex-row justify-content-center">
             <h5>CZF -&gt; CZF ·</h5>
@@ -193,12 +193,9 @@ export function LoopCZF({onCZAction, selectedPool}:{
                     </Button>
 
                     <Button variant='secondary' onClick={() => {
-                        try{
-                            const current = Number.parseFloat(loopAmount||'0');
-                            setLoopAmount((current+1).toString());
-                        }catch{}
+                        window.open('https://app.1inch.io/#/56/swap/BNB/0x7c1608C004F20c3520f70b924E2BfeF092dA0043');
                     }}>
-                        +CZF
+                        Buy CZF
                     </Button>
 
                 </div>
