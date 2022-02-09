@@ -59,3 +59,4 @@ Disclaimer
 
 `done - reduced size` 5. footer icons are pixelated 
 
+`done` - lower down the image intensity for light mode background image
