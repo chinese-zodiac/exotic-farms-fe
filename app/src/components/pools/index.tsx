@@ -16,6 +16,9 @@ import constate from 'constate';
 import moment from 'moment';
 
 import {CZActionProps, PoolProps} from '../main/loopCZF';
+import { CZFarm } from '../../typechain/CZFarm';
+import CZFarm_JSON from '../../typechain/CZFarm.json';
+
 
 const _lpDefination:{[lp:string]:{
     title: string;
@@ -124,6 +127,7 @@ export const [PoolsProvider,
     );
 
 export function useLoadPools(){
+
     const { readOnly } = useConnectCalls();
     const [exoticPools, setExoticPools] = useState<IAsyncResult<{[lp:string]:PoolListProps}>>({});
     const [chronoPools, setChronoPools] = useState<IAsyncResult<PoolProps[]>>();
@@ -150,7 +154,8 @@ export function useLoadPools(){
                         const apr = Number.parseInt(pool.adjustedRateBasis_) / 100.0;
 
                         let czf = '';
-                        let harvestable= ''
+                        let harvestable= '';
+
                         if(undefined !== account){
                             const accInfo = await chronoPoolService.methods.getChronoPoolAccountInfo(account,pId).call();
                             czf = web3ro.utils.fromWei( accInfo.emissionRate_);
@@ -210,7 +215,8 @@ export function useLoadPools(){
                         const apr = Number.parseInt(pool.adjustedRateBasis_) / 100.0;
 
                         let czf = '';
-                        let harvestable= ''
+                        let harvestable= '';
+
                         if(undefined !== account){
                             const accInfo = await exoticMaster.methods.getExoticFarmAccountInfo(account,pId).call();
                             czf = web3ro.utils.fromWei( accInfo.emissionRate_);
@@ -228,8 +234,21 @@ export function useLoadPools(){
                                 throw new Error(`Unknown LP ${pool.lp_}`);
                             }
 
+                            let lpBalance_eth = 0;
+
+                            /* need more clearifications
+                            if(undefined !== account){
+                                const bep20: CZFarm = new web3ro.eth.Contract(CZFarm_JSON.abi as any, pool.lp_) as any;
+
+                                const lpBalance_Wei = await bep20.methods.allowance(account,chainInfo.contracts.exoticMaster).call();
+                                lpBalance_eth = Number.parseFloat( web3ro.utils.fromWei(lpBalance_Wei));
+                                
+                            }
+                            */
+
                             poolsMap[pool.lp_]={
                                 ...foundLpDef,
+                                lpBalance_eth,
                                 pools:[],
                             };
                         }
@@ -326,6 +345,7 @@ type PoolListProps =  {
     title?: string;
     guideUrl?:string;
     cashLogo?: string;
+    lpBalance_eth?:number;
     actions?: { label: string, action:(p:PoolProps)=>any }[]
     pools: PoolProps[]
 };

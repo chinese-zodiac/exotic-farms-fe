@@ -175,6 +175,9 @@ export default function MainContent() {
 
                                 const depositAmount = web3.utils.toWei(wadEther, 'ether');
 
+                                //bep20.methods.allowance()
+
+
                                 await bep20.methods.approve(chainInfo.contracts.exoticMaster,depositAmount);
 
                                 const exoticMaster: ExoticMaster = new web3.eth.Contract(ExoticMaster_JSON.abi as any, chainInfo.contracts.exoticMaster) as any;
