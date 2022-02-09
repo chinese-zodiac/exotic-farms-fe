@@ -112,6 +112,7 @@ export type CZActionProps = { pId: number; } & ({
 
     //we are looping exoticWith lp
     exoticLp?: string;
+    lpBalance_eth?: number;
 } | {
     type: 'loopAllCZF';
 } | {
@@ -131,12 +132,17 @@ export type CZActionProps = { pId: number; } & ({
     percentage?: number;
     amountEth?: string;
     exoticLp?: string;
+    lpBalance_eth?: number;
 } | {
     type: 'harvestCZF-lp';
 } | {
     type: 'ff75-lp';
 } | {
     type: 'ff75-lp-confirmed';
+}| {
+    type: 'depositLP';
+    exoticLp: string;
+    amountEth: string;
 }
 );
 

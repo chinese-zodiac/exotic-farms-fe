@@ -36,7 +36,7 @@ export default function MainContent() {
 
                 switch (p.type) {
 
-                    
+
                     case 'ff75-lp-confirmed':
                         {
                             setSubmitted({ isLoading: true });
@@ -130,6 +130,20 @@ export default function MainContent() {
                         }
                         break;
 
+                    case 'depositLP': {
+                        setSubmitted({ isLoading: true });
+                        const { web3, chainInfo, account } = await connect();
+
+                        const exoticMaster: ExoticMaster = new web3.eth.Contract(ExoticMaster_JSON.abi as any, chainInfo.contracts.exoticMaster) as any;
+
+                        const tx = await exoticMaster.methods.deposit(p.pId, p.amountEth).send({
+                            from: account
+                        });
+
+                        setSubmitted({ result: { txHash: tx.transactionHash, chainInfo } });
+
+                    }
+                        break;
                     case 'loopCZFConfirmed':
                         {
                             setSubmitted({ isLoading: true });
@@ -140,60 +154,64 @@ export default function MainContent() {
                                 throw new Error('amount or percentage is required');
                             }
 
-                            let wadEther: string;
+                            debugger;
 
-                            if (undefined !== p.percentage) {
-                                const czFarm: CZFarm = new web3.eth.Contract(CZFarm_JSON.abi as any, chainInfo.contracts.czFarm) as any;
-                                const currBalance_Wei = await czFarm.methods.balanceOf(account).call();
+                            if (p.exoticLp) {
 
-                                
-
-                                let wad = Number.parseFloat(web3.utils.fromWei(currBalance_Wei));
-                                if(0==wad){
-                                    throw new Error('There is no CZF balance');
+                                if (undefined === p.percentage) {
+                                    throw new Error('percentage is required');
                                 }
 
-                                console.debug(`CZF Balance is ${currBalance_Wei} wei -> ${wad}`);
-                                wad = (wad * p.percentage / 100.0);
-
-                                wadEther = wad.toString();
-
-                            } else {
-                                if (!p.amountEth) {
-                                    throw new Error('amount is required');
+                                if (undefined === p.lpBalance_eth) {
+                                    throw new Error('LP Balance is required');
                                 }
-                                wadEther = p.amountEth;
-                            }
-
-                            
-
-                            if(p.exoticLp){
 
                                 const bep20: CZFarm = new web3.eth.Contract(CZFarm_JSON.abi as any, p.exoticLp) as any;
 
-                                const depositAmount = web3.utils.toWei(wadEther, 'ether');
+                                const wadEther = (p.lpBalance_eth * p.percentage / 100.0);
 
-                                //bep20.methods.allowance()
+                                const depositAmount = web3.utils.toWei(wadEther.toString(), 'ether');
 
-
-                                await bep20.methods.approve(chainInfo.contracts.exoticMaster,depositAmount);
-
-                                const exoticMaster: ExoticMaster = new web3.eth.Contract(ExoticMaster_JSON.abi as any, chainInfo.contracts.exoticMaster) as any;
-
-                                const tx = await exoticMaster.methods.deposit(p.pId, depositAmount).send({
+                                const tx = await bep20.methods.approve(chainInfo.contracts.exoticMaster, depositAmount).send({
                                     from: account
                                 });
-    
+
+
                                 setSubmitted({ result: { txHash: tx.transactionHash, chainInfo } });
-    
-                            }else{
+
+                            } else {
+                                let wadEther: string;
+
+                                if (undefined !== p.percentage) {
+                                    const czFarm: CZFarm = new web3.eth.Contract(CZFarm_JSON.abi as any, chainInfo.contracts.czFarm) as any;
+                                    const currBalance_Wei = await czFarm.methods.balanceOf(account).call();
+
+
+
+                                    let wad = Number.parseFloat(web3.utils.fromWei(currBalance_Wei));
+                                    if (0 == wad) {
+                                        throw new Error('There is no CZF balance');
+                                    }
+
+                                    console.debug(`CZF Balance is ${currBalance_Wei} wei -> ${wad}`);
+                                    wad = (wad * p.percentage / 100.0);
+
+                                    wadEther = wad.toString();
+
+                                } else {
+                                    if (!p.amountEth) {
+                                        throw new Error('amount is required');
+                                    }
+                                    wadEther = p.amountEth;
+                                }
+
                                 const chronoPoolService: ChronoPoolService = new web3.eth.Contract(ChronoPoolService_JSON.abi as any, chainInfo.contracts.chronoPoolService) as any;
                                 const tx = await chronoPoolService.methods.deposit(p.pId, web3.utils.toWei(wadEther, 'ether')).send({
                                     from: account
                                 });
-    
+
                                 setSubmitted({ result: { txHash: tx.transactionHash, chainInfo } });
-    
+
                             }
 
 
@@ -220,11 +238,12 @@ export default function MainContent() {
 
         {loopAction?.type == 'loopCZF' && <LoopModal
             onClose={() => setLoopAction(undefined)}
-            onConfirm={percentage => onCZAction({ 
-                type: 'loopCZFConfirmed', 
-                percentage, 
+            onConfirm={percentage => onCZAction({
+                type: 'loopCZFConfirmed',
+                percentage,
                 pId: loopAction.pId,
-                exoticLp:loopAction.exoticLp
+                exoticLp: loopAction.exoticLp,
+                lpBalance_eth: loopAction.lpBalance_eth
             })}
         />}
 
@@ -238,14 +257,14 @@ export default function MainContent() {
             onConfirm={() => onCZAction({ type: 'ff75-lp-confirmed', pId: loopAction.pId })}
         />}
 
-        <CZFView/>
+        <CZFView />
 
         <Row className="gap-3 my-5">
             <Col md className="high-yield-left"></Col>
             <Col md>
                 <div>
                     <h3 className="mb-3">Loop CZF For High Yield</h3>
-                    <LoopCZF {...{  onCZAction }} />
+                    <LoopCZF {...{ onCZAction }} />
                 </div>
             </Col>
         </Row>
@@ -262,13 +281,13 @@ export default function MainContent() {
                 </p>
 
                 <div className="d-flex flex-row gap-1 social-how">
-                    <Button variant='link' onClick={()=>window.open('https://czodiac.gitbook.io/czodiac-litepapper/')}>
+                    <Button variant='link' onClick={() => window.open('https://czodiac.gitbook.io/czodiac-litepapper/')}>
                         <div className="icon-how btn-how-copy"></div>
                     </Button>
-                    <Button variant='link' onClick={()=>window.open('https://t.me/CZodiacofficial')}>
+                    <Button variant='link' onClick={() => window.open('https://t.me/CZodiacofficial')}>
                         <div className="icon-how btn-how-tele"></div>
                     </Button>
-                    <Button variant='link' onClick={()=>window.open('https://discord.gg/FEpu3xF2Hb')}>
+                    <Button variant='link' onClick={() => window.open('https://discord.gg/FEpu3xF2Hb')}>
                         <div className="icon-how btn-how-discord"></div>
                     </Button>
                 </div>

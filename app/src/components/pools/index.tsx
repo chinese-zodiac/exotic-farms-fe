@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, FC } from 'react';
 import { IAsyncResult, ShowError } from '../utils';
 import { Button, Spinner, Row, Col } from 'react-bootstrap';
 import './chronoPools.scss';
@@ -44,10 +44,10 @@ const _lpDefination: {
 
 export function ChronoPools({ onCZAction }: {
     onCZAction: (props: CZActionProps) => any;
-    
+
 }) {
     const pools = useChronoPools();
-    
+
     /*
     const pool = {
         pools: [
@@ -84,7 +84,7 @@ export function ChronoPools({ onCZAction }: {
 
     return <PoolsView
         poolList={[pool]}
-        
+
         title="Chrono Pools"
         guidePrompt="Chrono Pool Guide"
         guideURL="https://czodiac.gitbook.io/czodiac-litepapper/features-active/chrono-pools"
@@ -101,14 +101,14 @@ export const [PoolsProvider,
 
 // props we get from the pool RPC methods
 type PoolRPCProps = {
-    poolType:PoolTypeProps;
-    pId:number;
-    accountInfo?:{
+    poolType: PoolTypeProps;
+    pId: number;
+    accountInfo?: {
         updateEpoch_: string;
         emissionRate_: string;
         totalVesting_: string;
     },
-    poolInfo:{
+    poolInfo: {
         adjustedRateBasis_: string;
         vestPeriod_: string;
     }
@@ -139,49 +139,49 @@ function durationFromSeconds(vestPeriod_: string) {
 }
 */
 
-function fromPool(web3:Web3,{poolType, pId,accountInfo,poolInfo}:PoolRPCProps):PoolProps {
+function fromPool(web3: Web3, { poolType, pId, accountInfo, poolInfo }: PoolRPCProps): PoolProps {
 
     const apr = Number.parseInt(poolInfo.adjustedRateBasis_) / 100.0;
-    
+
 
     const m_duration = moment.duration(poolInfo.vestPeriod_, 'seconds');
-    const durationDays = Math.ceil( m_duration.asDays());
+    const durationDays = Math.ceil(m_duration.asDays());
     const durationMonths = Math.ceil(m_duration.asMonths());
-    
-    const partialYear = durationMonths % 12 ;
+
+    const partialYear = durationMonths % 12;
 
     let duration = '';
-    if(partialYear>1){
+    if (partialYear > 1) {
         duration = `${durationMonths} months`;
-    }else{
-        const futureDay = moment().add(m_duration,'seconds');
+    } else {
+        const futureDay = moment().add(m_duration, 'seconds');
         duration = futureDay.fromNow(true);
-    
+
     }
 
     /*userInfo.emissionRate * secondsPerDay = CZF/Day*/
 
-    const accoutEmissionrate = (accountInfo?.emissionRate_  && 
-                    Number.parseFloat(web3.utils.fromWei(accountInfo.emissionRate_))) ||0;
+    const accoutEmissionrate = (accountInfo?.emissionRate_ &&
+        Number.parseFloat(web3.utils.fromWei(accountInfo.emissionRate_))) || 0;
 
     const czfPerDay = accoutEmissionrate * (24 * 60 * 60);
 
-    const vested = (accountInfo?.totalVesting_  && 
-                    Number.parseFloat(web3.utils.fromWei(accountInfo.totalVesting_))) ||0;
+    const vested = (accountInfo?.totalVesting_ &&
+        Number.parseFloat(web3.utils.fromWei(accountInfo.totalVesting_))) || 0;
 
     /*(currentEpoch - userInfo.updateEpoch) * userInfo.emissionRate = Est Harvestable*/
-    const  harvestableFn = ()=>{
-        if(!accoutEmissionrate || !accountInfo?.updateEpoch_ ){
+    const harvestableFn = () => {
+        if (!accoutEmissionrate || !accountInfo?.updateEpoch_) {
             return 0;
         }
-            
+
         const secondsSinceEpoch = Math.round(new Date().getTime() / 1000);
 
         return (secondsSinceEpoch - Number.parseInt(accountInfo.updateEpoch_)) * accoutEmissionrate;
 
     }
 
-    return {...poolType,apr,vested, harvestableFn,duration,durationDays,pId, czfPerDay};
+    return { ...poolType, apr, vested, harvestableFn, duration, durationDays, pId, czfPerDay };
 
 }
 
@@ -208,10 +208,10 @@ export function useLoadPools() {
 
                     try {
                         const poolInfo = await chronoPoolService.methods.getChronoPoolInfo(pId).call();
-                        const accountInfo = account && await chronoPoolService.methods.getChronoPoolAccountInfo(account, pId).call() ||undefined;
+                        const accountInfo = account && await chronoPoolService.methods.getChronoPoolAccountInfo(account, pId).call() || undefined;
 
-                        const pDetails = fromPool(web3ro, {pId,poolInfo,accountInfo, poolType:{type: 'chronoPool'}});
-                        if(!pDetails.apr){
+                        const pDetails = fromPool(web3ro, { pId, poolInfo, accountInfo, poolType: { type: 'chronoPool' } });
+                        if (!pDetails.apr) {
                             console.log(`pid ${pDetails.pId} has 0 apr`);
                             continue;
                         }
@@ -246,7 +246,7 @@ export function useLoadPools() {
                     }
                 }
 
-                result = result.sort((a,b)=>a.durationDays - b.durationDays);
+                result = result.sort((a, b) => a.durationDays - b.durationDays);
 
                 /*
                 if(result.length>0 && onPoolSelected){
@@ -283,10 +283,10 @@ export function useLoadPools() {
                         //const k = await exoticMaster.methods.getCzfPerLPWad(pId).call();
 
                         const poolInfo = await exoticMaster.methods.getExoticFarmInfo(pId).call();
-                        const accountInfo = account && await exoticMaster.methods.getExoticFarmAccountInfo(account, pId).call()||undefined;
+                        const accountInfo = account && await exoticMaster.methods.getExoticFarmAccountInfo(account, pId).call() || undefined;
 
-                        const pDetails = fromPool(web3ro,{pId,poolInfo,accountInfo, poolType:{type: 'exoticfarm', lp: poolInfo.lp_}});
-                        if(!pDetails.apr){
+                        const pDetails = fromPool(web3ro, { pId, poolInfo, accountInfo, poolType: { type: 'exoticfarm', lp: poolInfo.lp_ } });
+                        if (!pDetails.apr) {
                             console.log(`pid ${pDetails.pId} has 0 apr`);
                             continue;
                         }
@@ -317,20 +317,23 @@ export function useLoadPools() {
                             }
 
                             let lpBalance_eth = 0;
+                            let lpAllowance_eth =0;
 
-                            /* need more clearifications
+                             
                             if(undefined !== account){
-                                const bep20: CZFarm = new web3ro.eth.Contract(CZFarm_JSON.abi as any, pool.lp_) as any;
+                                const bep20: CZFarm = new web3ro.eth.Contract(CZFarm_JSON.abi as any, poolInfo.lp_) as any;
 
-                                const lpBalance_Wei = await bep20.methods.allowance(account,chainInfo.contracts.exoticMaster).call();
-                                lpBalance_eth = Number.parseFloat( web3ro.utils.fromWei(lpBalance_Wei));
+                                const lpAllowance_Wei = await bep20.methods.allowance(account,chainInfo.contracts.exoticMaster).call();
+                                lpAllowance_eth = Number.parseFloat( web3ro.utils.fromWei(lpAllowance_Wei));
                                 
+                                const lpBalance_Wei = await bep20.methods.balanceOf(account).call();
+                                lpBalance_eth = Number.parseFloat( web3ro.utils.fromWei(lpBalance_Wei));
                             }
-                            */
+                            
+                            const lpProps = {...foundLpDef,lpBalance_eth,lpAllowance_eth};
 
                             poolsMap[poolInfo.lp_] = {
-                                ...foundLpDef,
-                                lpBalance_eth,
+                                lpProps,
                                 pools: [],
                             };
                         }
@@ -350,10 +353,10 @@ export function useLoadPools() {
                     }
                 }
 
-                Object.keys(poolsMap).forEach(k=>{
-                    poolsMap[k].pools = poolsMap[k].pools.sort((a,b)=>a.durationDays - b.durationDays);
+                Object.keys(poolsMap).forEach(k => {
+                    poolsMap[k].pools = poolsMap[k].pools.sort((a, b) => a.durationDays - b.durationDays);
                 });
-                
+
 
                 //setPools({ result: Object.keys(poolsMap).map(k=>poolsMap[k])  });
                 setExoticPools({ result: poolsMap });
@@ -368,6 +371,16 @@ export function useLoadPools() {
     return { exoticPools, chronoPools };
 }
 
+function ApproveLP({ pool,lp }: { pool: PoolProps, lp?: PoolLpProps }){
+
+
+    useEffect(()=>{
+        console.debug(`applorve lop called`);
+    },[pool])
+
+    return <div>helo me {lp?.title}</div>;
+}
+
 export function ExoticFarms({ onCZAction }: {
     onCZAction: (props: CZActionProps) => any;
 }) {
@@ -376,14 +389,43 @@ export function ExoticFarms({ onCZAction }: {
 
     const actions = [
         {
+            Component: ({ pool,lp }: { pool: PoolProps, lp?: PoolLpProps })=>{
+
+                if(!lp || pool?.type != 'exoticfarm'){
+                    return <small className="text-danger">no LP</small>;
+                }
+
+                if(lp.lpAllowance_eth > 0 ){
+                    return <Button size="lg" variant='secondary' className="mx-3 flex-grow-1" onClick={() => {
+                        onCZAction({ type: 'depositLP', pId: pool.pId, exoticLp: pool?.lp,amountEth:lp.lpAllowance_eth.toString() });
+                    }}>
+                        Deposit LP
+                    </Button>
+                }else if(lp.lpBalance_eth >0 ){
+                    return <Button size="lg" variant='secondary' className="mx-3 flex-grow-1" onClick={() => {
+                        onCZAction({ type: 'loopCZF', pId: pool.pId, exoticLp: pool?.lp,lpBalance_eth:lp.lpBalance_eth });
+                    }}>
+                        Approve LP
+                    </Button>
+                }else{
+                    return <Button size="lg" variant='secondary' className="mx-3 flex-grow-1" onClick={() => {
+                        window.open(lp.guideUrl);
+                    }}>
+                        Mint LP
+                    </Button>
+                }
+
+                
+            },
             label: 'Approve LP', action: (pool: PoolProps) => {
+
                 if (pool?.type != 'exoticfarm') {
                     throw new Error('incorrect pool type');
                 }
                 if (!pool?.lp) {
                     throw new Error('pool LP is required');
                 }
-                onCZAction({ type: 'loopCZF', pId: pool.pId, exoticLp: pool?.lp })
+                onCZAction({ type: 'loopCZF', pId: pool.pId, exoticLp: pool?.lp });
             }
         },
         { label: 'Harvest CZF', action: (p: PoolProps) => onCZAction({ type: 'harvestCZF-lp', pId: p.pId }) },
@@ -432,32 +474,39 @@ export function ExoticFarms({ onCZAction }: {
     />;
 }
 
+type PoolLpProps ={
+    title: string;
+    guideUrl: string;
+    lpBalance_eth: number; lpAllowance_eth: number;
+    cashLogo: string;
+}
+
 type PoolListProps = {
-    title?: string;
-    guideUrl?: string;
-    cashLogo?: string;
-    lpBalance_eth?: number;
-    actions?: { label: string, action: (p: PoolProps) => any }[]
+    lpProps?:PoolLpProps;
+    actions?: { 
+        Component?: (props: { pool: PoolProps, lp?: PoolLpProps }) => JSX.Element; 
+        label: string, action: (p: PoolProps) => any 
+    }[]
     pools: PoolProps[]
 };
 
 
-function EstHarvest({p}:{
-    p:PoolProps;
-}){
-    const [estHarv,setEstHarv] = useState('');
-    useEffect(()=>{
+function EstHarvest({ p }: {
+    p: PoolProps;
+}) {
+    const [estHarv, setEstHarv] = useState('');
+    useEffect(() => {
 
-        const harvestTimer = setInterval(()=>{
+        const harvestTimer = setInterval(() => {
             setEstHarv(formatCZfVal(p.harvestableFn()));
             //console.debug(`harv updated : ${harvastable}`);
-          },1000);
-      
-          return ()=>{
+        }, 1000);
+
+        return () => {
             clearInterval(harvestTimer);
-          }
-      
-    },[p]);
+        }
+
+    }, [p]);
     return <h5>{estHarv}</h5>;
 }
 
@@ -490,10 +539,10 @@ function PoolsView({ poolList, title, guidePrompt, guideURL }: {
 
         {poolList.map((pl, poolListIndex) => <div key={poolListIndex}>
 
-            {pl.title && <div className='mt-4 mb-2 d-flex flex-row gap-2 align-items-center'>
-                <h5 className="pt-2">{pl.title}</h5>
-                <Button variant='link' onClick={() => pl.guideUrl && window.open(pl.guideUrl)} >
-                    <span className="guide">{pl.title}</span>
+            {pl.lpProps?.title && <div className='mt-4 mb-2 d-flex flex-row gap-2 align-items-center'>
+                <h5 className="pt-2">{pl.lpProps.title}</h5>
+                <Button variant='link' onClick={() => pl.lpProps?.guideUrl && window.open(pl.lpProps?.guideUrl)} >
+                    <span className="guide">{pl.lpProps.title}</span>
                 </Button>
             </div>}
 
@@ -506,8 +555,8 @@ function PoolsView({ poolList, title, guidePrompt, guideURL }: {
                             <div className="logo"></div>
                         </div>
 
-                        {pl.cashLogo && <div className="poolLogo bg-secondary-mod-1 cashLogo">
-                            <div className={pl.cashLogo}></div>
+                        {pl.lpProps?.cashLogo && <div className="poolLogo bg-secondary-mod-1 cashLogo">
+                            <div className={pl.lpProps.cashLogo}></div>
                         </div>
                         }
 
@@ -530,7 +579,7 @@ function PoolsView({ poolList, title, guidePrompt, guideURL }: {
 
                     <div className="flex-grow-1 text-center">
                         <small>Est. Harvestable</small>
-                        <EstHarvest p={p}/>
+                        <EstHarvest p={p} />
                     </div>
 
                     <Button variant='link' onClick={() => {
@@ -544,16 +593,21 @@ function PoolsView({ poolList, title, guidePrompt, guideURL }: {
                     </Button>
                 </div>
 
-                {expandedpId  == p.pId &&
+                {expandedpId == p.pId &&
                     <div className="px-5"><Row className="poolViewActions p-4">
                         {(pl.actions || []).map((a, actionIndex) => <Col key={actionIndex} className="text-center">
-                            <Button size="lg" variant='secondary' className="mx-3 flex-grow-1" onClick={() => {
-                                a.action(p);
-                            }}>
-                                {a.label}
-                            </Button>
+
+                            {a.Component ? <a.Component pool={p} lp={pl.lpProps} /> :
+                                <Button size="lg" variant='secondary' className="mx-3 flex-grow-1" onClick={() => {
+                                    a.action(p);
+                                }}>
+                                    {a.label}
+                                </Button>
+                            }
+
                         </Col>)}
-                    </Row></div>}
+                    </Row></div>
+                }
 
             </div>)}
 

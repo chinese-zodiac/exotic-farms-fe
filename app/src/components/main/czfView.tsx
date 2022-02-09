@@ -35,6 +35,7 @@ export default function CZFView() {
         const chainInfo = networkId && supportedChains.find(n => n.chainId == networkId) || undefined;
 
         if (!chainInfo || undefined === account) {
+          setCzfBalance({result:''});
           return;
         }
 
@@ -59,7 +60,7 @@ export default function CZFView() {
 
     const chainInfo = networkId && supportedChains.find(n => n.chainId == networkId) || undefined;
 
-    if (!chainInfo || undefined === account || !chronoPools?.result || !exoticPools?.result) {
+    if (!chainInfo  || !chronoPools?.result || !exoticPools?.result) {
       return;
     }
 
@@ -82,7 +83,7 @@ export default function CZFView() {
       clearInterval(harvestTimer);
     }
 
-  }, [account, networkId, nounce, chronoPools?.result, exoticPools?.result]);
+  }, [networkId, nounce, chronoPools?.result, exoticPools?.result]);
 
 
   const czfData = [

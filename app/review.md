@@ -42,15 +42,11 @@ Exotic Farms
 CZF/BNB https://pancakeswap.finance/add/0x7c1608C004F20c3520f70b924E2BfeF092dA0043/BNB
 CZF/BUSD https://pancakeswap.finance/add/0x7c1608C004F20c3520f70b924E2BfeF092dA0043/0xe9e7cea3dedca5984780bafc599bd69add087d56
 
-- If the LP token has already been approved, then it should instead display a "Deposit LP" button if the LP token balance of the wallet is more than zero. Otherwise, it should have a "Mint LP" button which links to the correct LP minting on Pancakeswap.
+# Note I am not able to test this fully (except mock and test) as I couldn't create LP on testnet
+` done `- If the LP token has already been approved, then it should instead display a "Deposit LP" button if the LP token balance of the wallet is more than zero. Otherwise, it should have a "Mint LP" button which links to the correct LP minting on Pancakeswap.
 
 Disclaimer
 `done` - Fix spacing to match figma
-
-app.1inch.io
-1inch - DeFi / DEX aggregator on Ethereum, Binance Smart Chain, Optimism, Polygon, Arbitrum
-
-DeFi / DEX aggregator with the most liquidity and the best rates on Ethereum, Binance Smart Chain, Optimism, Polygon, 1inch dApp is an entry point to the 1inch Network's ...
 
 
 ---
@@ -63,4 +59,3 @@ DeFi / DEX aggregator with the most liquidity and the best rates on Ethereum, Bi
 
 `done - reduced size` 5. footer icons are pixelated 
 
-//https://ethereum.stackexchange.com/questions/112957/getting-uniswap-v2-eth-usdc-price-from-reserves-with-web3
