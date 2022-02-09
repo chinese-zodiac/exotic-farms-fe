@@ -4,7 +4,7 @@ import { Button, Spinner, Row, Col } from 'react-bootstrap';
 import './chronoPools.scss';
 import { useConnectCalls, useAccountCtx } from '../web3';
 
-import {formatCZfVal} from '../utils/display';
+import { formatCZfVal } from '../utils/display';
 
 import { ChronoPoolService } from '../../typechain/ChronoPoolService';
 import ChronoPoolService_JSON from '../../typechain/ChronoPoolService.json';
@@ -14,23 +14,26 @@ import ExoticMaster_JSON from '../../typechain/ExoticMaster.json';
 import constate from 'constate';
 
 import moment from 'moment';
+import Web3 from 'web3';
 
-import {CZActionProps, PoolProps} from '../main/loopCZF';
+import { CZActionProps, PoolProps, PoolTypeProps } from '../main/loopCZF';
 import { CZFarm } from '../../typechain/CZFarm';
 import CZFarm_JSON from '../../typechain/CZFarm.json';
 
 
-const _lpDefination:{[lp:string]:{
-    title: string;
-    cashLogo: string;
-    guideUrl: string ;
-}} ={
-    '0xeF8e8CfADC0b634b6d0065080a69F139159a17dE':{
+const _lpDefination: {
+    [lp: string]: {
+        title: string;
+        cashLogo: string;
+        guideUrl: string;
+    }
+} = {
+    '0xeF8e8CfADC0b634b6d0065080a69F139159a17dE': {
         title: 'CZF/BNB on PCS',
         cashLogo: 'bnbLogo',
         guideUrl: 'https://pancakeswap.finance/add/0x7c1608C004F20c3520f70b924E2BfeF092dA0043/BNB'
     },
-    '0xAAC96d00C566571bafdfa3B8440Bdc3cDB223Ad0':{
+    '0xAAC96d00C566571bafdfa3B8440Bdc3cDB223Ad0': {
         title: 'CZF/BUSD on PCS',
         cashLogo: 'busdLogo',
         guideUrl: 'https://pancakeswap.finance/add/0x7c1608C004F20c3520f70b924E2BfeF092dA0043/0xe9e7cea3dedca5984780bafc599bd69add087d56'
@@ -39,21 +42,12 @@ const _lpDefination:{[lp:string]:{
 
 
 
-export function ChronoPools({onCZAction,onPoolSelected}:{
-    onCZAction:(props:CZActionProps)=>any;
-    onPoolSelected?:(p:PoolProps)=>any;
+export function ChronoPools({ onCZAction }: {
+    onCZAction: (props: CZActionProps) => any;
+    
 }) {
-    const { readOnly } = useConnectCalls();
     const pools = useChronoPools();
-
-    useEffect(() => {
-
-        if(pools?.result && pools.result.length>0 && onPoolSelected){
-            onPoolSelected(pools.result[0]);
-        }
-
-    }, [pools?.result]);
-
+    
     /*
     const pool = {
         pools: [
@@ -80,28 +74,53 @@ export function ChronoPools({onCZAction,onPoolSelected}:{
     const pool = {
         pools: pools?.result || [],
         actions: [
-            { label: 'Loop CZF', action:(p:PoolProps)=>onCZAction({type:'loopCZF',pId:p.pId}) },
-            { label: 'ReLoop CZF' , action:(p:PoolProps)=>onCZAction({type:'reloopCZF',pId:p.pId})},
-            { label: 'Harvest CZF' , action:(p:PoolProps)=>onCZAction({type:'harvestCZF',pId:p.pId})},
-            { label: 'Fast Foward 75.00%' , action:(p:PoolProps)=>onCZAction({type:'ff75',pId:p.pId})},
-            { label: 'Buy CZF' , action:(p:PoolProps)=>onCZAction({type:'buyCZF',pId:p.pId})},
+            { label: 'Loop CZF', action: (p: PoolProps) => onCZAction({ type: 'loopCZF', pId: p.pId }) },
+            { label: 'ReLoop CZF', action: (p: PoolProps) => onCZAction({ type: 'reloopCZF', pId: p.pId }) },
+            { label: 'Harvest CZF', action: (p: PoolProps) => onCZAction({ type: 'harvestCZF', pId: p.pId }) },
+            { label: 'Fast Foward 75.00%', action: (p: PoolProps) => onCZAction({ type: 'ff75', pId: p.pId }) },
+            { label: 'Buy CZF', action: (p: PoolProps) => onCZAction({ type: 'buyCZF', pId: p.pId }) },
         ]
     };
 
-    return <PoolsView 
-        poolList={[pool]} 
-        onPoolSelected={onPoolSelected}
-        title="Chrono Pools" 
+    return <PoolsView
+        poolList={[pool]}
+        
+        title="Chrono Pools"
         guidePrompt="Chrono Pool Guide"
-        guideURL="https://czodiac.gitbook.io/czodiac-litepapper/features-active/chrono-pools" 
+        guideURL="https://czodiac.gitbook.io/czodiac-litepapper/features-active/chrono-pools"
     />;
 }
 
-function durationFromSeconds(vestPeriod_:string){
+
+export const [PoolsProvider,
+    useExoticPools, useChronoPools] = constate(
+        useLoadPools,
+        v => v.exoticPools,
+        v => v.chronoPools
+    );
+
+// props we get from the pool RPC methods
+type PoolRPCProps = {
+    poolType:PoolTypeProps;
+    pId:number;
+    accountInfo?:{
+        updateEpoch_: string;
+        emissionRate_: string;
+        totalVesting_: string;
+    },
+    poolInfo:{
+        adjustedRateBasis_: string;
+        vestPeriod_: string;
+    }
+
+}
+
+/*
+
+function durationFromSeconds(vestPeriod_: string) {
 
     const m_duration = moment.duration(vestPeriod_, 'seconds');
-
-    const durationDays =m_duration.asDays(); 
+    const durationDays = m_duration.asDays();
 
     let duration = `${durationDays} DAYS`;
     const years = Math.floor(m_duration.asYears());
@@ -116,20 +135,60 @@ function durationFromSeconds(vestPeriod_:string){
         duration = '1 MONTH';
     }
 
-    return {duration, durationDays};
+    return { duration, durationDays };
+}
+*/
+
+function fromPool(web3:Web3,{poolType, pId,accountInfo,poolInfo}:PoolRPCProps):PoolProps {
+
+    const apr = Number.parseInt(poolInfo.adjustedRateBasis_) / 100.0;
+    
+
+    const m_duration = moment.duration(poolInfo.vestPeriod_, 'seconds');
+    const durationDays = Math.ceil( m_duration.asDays());
+    const durationMonths = Math.ceil(m_duration.asMonths());
+    
+    const partialYear = durationMonths % 12 ;
+
+    let duration = '';
+    if(partialYear>1){
+        duration = `${durationMonths} months`;
+    }else{
+        const futureDay = moment().add(m_duration,'seconds');
+        duration = futureDay.fromNow(true);
+    
+    }
+
+    /*userInfo.emissionRate * secondsPerDay = CZF/Day*/
+
+    const accoutEmissionrate = (accountInfo?.emissionRate_  && 
+                    Number.parseFloat(web3.utils.fromWei(accountInfo.emissionRate_))) ||0;
+
+    const czfPerDay = accoutEmissionrate * (24 * 60 * 60);
+
+    const vested = (accountInfo?.totalVesting_  && 
+                    Number.parseFloat(web3.utils.fromWei(accountInfo.totalVesting_))) ||0;
+
+    /*(currentEpoch - userInfo.updateEpoch) * userInfo.emissionRate = Est Harvestable*/
+    const  harvestableFn = ()=>{
+        if(!accoutEmissionrate || !accountInfo?.updateEpoch_ ){
+            return 0;
+        }
+            
+        const secondsSinceEpoch = Math.round(new Date().getTime() / 1000);
+
+        return (secondsSinceEpoch - Number.parseInt(accountInfo.updateEpoch_)) * accoutEmissionrate;
+
+    }
+
+    return {...poolType,apr,vested, harvestableFn,duration,durationDays,pId, czfPerDay};
+
 }
 
-export const [PoolsProvider,
-    useExoticPools,useChronoPools] = constate(
-        useLoadPools,
-        v => v.exoticPools,
-        v=>v.chronoPools
-    );
-
-export function useLoadPools(){
+export function useLoadPools() {
 
     const { readOnly } = useConnectCalls();
-    const [exoticPools, setExoticPools] = useState<IAsyncResult<{[lp:string]:PoolListProps}>>({});
+    const [exoticPools, setExoticPools] = useState<IAsyncResult<{ [lp: string]: PoolListProps }>>({});
     const [chronoPools, setChronoPools] = useState<IAsyncResult<PoolProps[]>>();
     const { account, networkId, nounce } = useAccountCtx();
 
@@ -143,26 +202,38 @@ export function useLoadPools(){
 
                 const chronoPoolService: ChronoPoolService = new web3ro.eth.Contract(ChronoPoolService_JSON.abi as any, chainInfo.contracts.chronoPoolService) as any;
 
-                const result: PoolProps[] = [];
+                let result: PoolProps[] = [];
                 //max 50 pools
                 for (let pId = 0; pId <= 50; pId++) {
 
                     try {
-                        const pool = await chronoPoolService.methods.getChronoPoolInfo(pId).call();
+                        const poolInfo = await chronoPoolService.methods.getChronoPoolInfo(pId).call();
+                        const accountInfo = account && await chronoPoolService.methods.getChronoPoolAccountInfo(account, pId).call() ||undefined;
 
-                        const {duration, durationDays}= durationFromSeconds(pool.vestPeriod_);
-                        const apr = Number.parseInt(pool.adjustedRateBasis_) / 100.0;
-
-                        let czf = '';
-                        let harvestable= '';
-
-                        if(undefined !== account){
-                            const accInfo = await chronoPoolService.methods.getChronoPoolAccountInfo(account,pId).call();
-                            czf = web3ro.utils.fromWei( accInfo.emissionRate_);
-                            harvestable= web3ro.utils.fromWei(accInfo.totalVesting_);
+                        const pDetails = fromPool(web3ro, {pId,poolInfo,accountInfo, poolType:{type: 'chronoPool'}});
+                        if(!pDetails.apr){
+                            console.log(`pid ${pDetails.pId} has 0 apr`);
+                            continue;
                         }
 
-                        result.push({ type:'chronoPool', pId, duration,durationDays, apr, czf, harvestable });
+                        result.push(pDetails);
+
+                        /*
+
+                        const { duration, durationDays } = durationFromSeconds(poolInfo.vestPeriod_);
+                        const apr = Number.parseInt(poolInfo.adjustedRateBasis_) / 100.0;
+
+                        let czf = '';
+                        let harvestable = '';
+
+                        if (undefined !== account) {
+                            
+                            czf = web3ro.utils.fromWei(accountInfo.emissionRate_);
+                            harvestable = web3ro.utils.fromWei(accountInfo.totalVesting_);
+                        }
+
+                        result.push({ type: 'chronoPool', pId, duration, durationDays, apr, czfPerDay: czf, harvestableFn: harvestable });
+                        */
 
                     } catch (error: any) {
 
@@ -174,6 +245,8 @@ export function useLoadPools(){
                         }
                     }
                 }
+
+                result = result.sort((a,b)=>a.durationDays - b.durationDays);
 
                 /*
                 if(result.length>0 && onPoolSelected){
@@ -200,38 +273,47 @@ export function useLoadPools(){
 
                 const exoticMaster: ExoticMaster = new web3ro.eth.Contract(ExoticMaster_JSON.abi as any, chainInfo.contracts.exoticMaster) as any;
 
-                const poolsMap: {[lp:string]:PoolListProps} = {};
+                const poolsMap: { [lp: string]: PoolListProps } = {};
 
                 //max 50 pools
                 for (let pId = 0; pId <= 50; pId++) {
 
                     try {
-                        
+
                         //const k = await exoticMaster.methods.getCzfPerLPWad(pId).call();
-                        
-                        const pool = await exoticMaster.methods.getExoticFarmInfo(pId).call();
 
-                        const {duration, durationDays} = durationFromSeconds(pool.vestPeriod_);
-                        const apr = Number.parseInt(pool.adjustedRateBasis_) / 100.0;
+                        const poolInfo = await exoticMaster.methods.getExoticFarmInfo(pId).call();
+                        const accountInfo = account && await exoticMaster.methods.getExoticFarmAccountInfo(account, pId).call()||undefined;
 
-                        let czf = '';
-                        let harvestable= '';
-
-                        if(undefined !== account){
-                            const accInfo = await exoticMaster.methods.getExoticFarmAccountInfo(account,pId).call();
-                            czf = web3ro.utils.fromWei( accInfo.emissionRate_);
-                            harvestable= web3ro.utils.fromWei(accInfo.totalVesting_);
-
-                            
+                        const pDetails = fromPool(web3ro,{pId,poolInfo,accountInfo, poolType:{type: 'exoticfarm', lp: poolInfo.lp_}});
+                        if(!pDetails.apr){
+                            console.log(`pid ${pDetails.pId} has 0 apr`);
+                            continue;
                         }
 
 
-                        if(!poolsMap[pool.lp_]){
+                        /*
+                        const { duration, durationDays } = durationFromSeconds(poolInfo.vestPeriod_);
+                        const apr = Number.parseInt(poolInfo.adjustedRateBasis_) / 100.0;
 
-                            const foundLpDef = _lpDefination[pool.lp_];
+                        let czf = '';
+                        let harvestable = '';
 
-                            if(!foundLpDef){
-                                throw new Error(`Unknown LP ${pool.lp_}`);
+                        if (undefined !== account) {
+                            
+                            czf = web3ro.utils.fromWei(accountInfo.emissionRate_);
+                            harvestable = web3ro.utils.fromWei(accountInfo.totalVesting_);
+
+
+                        }
+                        */
+
+                        if (!poolsMap[poolInfo.lp_]) {
+
+                            const foundLpDef = _lpDefination[poolInfo.lp_];
+
+                            if (!foundLpDef) {
+                                throw new Error(`Unknown LP ${poolInfo.lp_}`);
                             }
 
                             let lpBalance_eth = 0;
@@ -246,14 +328,16 @@ export function useLoadPools(){
                             }
                             */
 
-                            poolsMap[pool.lp_]={
+                            poolsMap[poolInfo.lp_] = {
                                 ...foundLpDef,
                                 lpBalance_eth,
-                                pools:[],
+                                pools: [],
                             };
                         }
-                        
-                        poolsMap[pool.lp_].pools.push({type:'exoticfarm',lp:pool.lp_, pId, duration,durationDays, apr, czf, harvestable });
+
+                        poolsMap[poolInfo.lp_].pools.push(pDetails);
+
+                        //poolsMap[poolInfo.lp_].pools.push({ type: 'exoticfarm', lp: poolInfo.lp_, pId, duration, durationDays, apr, czfPerDay: czf, harvestableFn: harvestable });
 
                     } catch (error: any) {
 
@@ -266,8 +350,13 @@ export function useLoadPools(){
                     }
                 }
 
+                Object.keys(poolsMap).forEach(k=>{
+                    poolsMap[k].pools = poolsMap[k].pools.sort((a,b)=>a.durationDays - b.durationDays);
+                });
+                
+
                 //setPools({ result: Object.keys(poolsMap).map(k=>poolsMap[k])  });
-                setExoticPools({ result:poolsMap});
+                setExoticPools({ result: poolsMap });
 
             } catch (error: any) {
                 setExoticPools({ error });
@@ -276,28 +365,30 @@ export function useLoadPools(){
         })();
     }, [account, networkId, nounce]);
 
-    return {exoticPools,chronoPools};
+    return { exoticPools, chronoPools };
 }
 
-export function ExoticFarms({onCZAction}:{
-    onCZAction:(props:CZActionProps)=>any;
+export function ExoticFarms({ onCZAction }: {
+    onCZAction: (props: CZActionProps) => any;
 }) {
 
     const pools = useExoticPools();
 
-    const actions= [
-        { label: 'Approve LP', action:(pool:PoolProps)=>{
-            if(pool?.type!='exoticfarm'){
-                throw new Error('incorrect pool type');
+    const actions = [
+        {
+            label: 'Approve LP', action: (pool: PoolProps) => {
+                if (pool?.type != 'exoticfarm') {
+                    throw new Error('incorrect pool type');
+                }
+                if (!pool?.lp) {
+                    throw new Error('pool LP is required');
+                }
+                onCZAction({ type: 'loopCZF', pId: pool.pId, exoticLp: pool?.lp })
             }
-            if(!pool?.lp){
-                throw new Error('pool LP is required');
-            }
-            onCZAction({type:'loopCZF',pId:pool.pId, exoticLp:pool?.lp}) 
-        }},
-        { label: 'Harvest CZF' , action:(p:PoolProps)=>onCZAction({type:'harvestCZF-lp',pId:p.pId})},
-        { label: 'Fast Foward 75.00%' , action:(p:PoolProps)=>onCZAction({type:'ff75-lp',pId:p.pId})},
-        { label: 'Buy CZF' , action:(p:PoolProps)=>onCZAction({type:'buyCZF',pId:p.pId})},
+        },
+        { label: 'Harvest CZF', action: (p: PoolProps) => onCZAction({ type: 'harvestCZF-lp', pId: p.pId }) },
+        { label: 'Fast Foward 75.00%', action: (p: PoolProps) => onCZAction({ type: 'ff75-lp', pId: p.pId }) },
+        { label: 'Buy CZF', action: (p: PoolProps) => onCZAction({ type: 'buyCZF', pId: p.pId }) },
     ]
 
     /*
@@ -327,53 +418,53 @@ export function ExoticFarms({onCZAction}:{
         return <Spinner animation="border" variant="primary" />;
     }
 
-    if (pools?.error ) {
+    if (pools?.error) {
         return <ShowError error={pools?.error} />;
     }
 
-    const poolList = pools.result && Object.keys(pools.result).map(k=>{
-        return {...((pools.result||{})[k]), actions};
-    })||[];
+    const poolList = pools.result && Object.keys(pools.result).map(k => {
+        return { ...((pools.result || {})[k]), actions };
+    }) || [];
 
-    return <PoolsView poolList={poolList||[]} 
-        title="Exotic Farms" guidePrompt="Exotic Farms Guide"  
-        guideURL='https://czodiac.gitbook.io/czodiac-litepapper/features-active/exotic-farms' 
+    return <PoolsView poolList={poolList || []}
+        title="Exotic Farms" guidePrompt="Exotic Farms Guide"
+        guideURL='https://czodiac.gitbook.io/czodiac-litepapper/features-active/exotic-farms'
     />;
 }
 
-type PoolListProps =  {
+type PoolListProps = {
     title?: string;
-    guideUrl?:string;
+    guideUrl?: string;
     cashLogo?: string;
-    lpBalance_eth?:number;
-    actions?: { label: string, action:(p:PoolProps)=>any }[]
+    lpBalance_eth?: number;
+    actions?: { label: string, action: (p: PoolProps) => any }[]
     pools: PoolProps[]
 };
 
-function PoolsView({ poolList, title, guidePrompt, guideURL, onPoolSelected  }: {
-    title: string; guidePrompt: string; guideURL:string;
-    onPoolSelected?:(p:PoolProps)=>any;
+function PoolsView({ poolList, title, guidePrompt, guideURL }: {
+    title: string; guidePrompt: string; guideURL: string;
+    
     poolList: PoolListProps[]
 }) {
 
-    const [expandedPool, setExpandedPool] = useState<{ poolListIndex: Number; poolIndex: Number; }>();
+    const [expandedpId, setExpandedpId] = useState<number>();
 
-    useEffect(()=>{
+    useEffect(() => {
 
-        if(poolList && poolList.length>0){
-            if(poolList[0].pools.length>0){
-                setExpandedPool({poolListIndex:0,poolIndex:0});
+        if (poolList && poolList.length > 0) {
+            if (poolList[0].pools.length > 0) {
+                setExpandedpId(poolList[0].pools[0].pId);
             }
         }
 
-    },[poolList]);
+    }, [poolList]);
 
     return <div className="bg-secondary-mod-1 poolsView p-3">
 
         <div className="d-flex flex-row justify-content-between">
             <h4>{title}</h4>
 
-            <Button variant='link' onClick={()=>window.open(guideURL)}>
+            <Button variant='link' onClick={() => window.open(guideURL)}>
                 <span className="guide">{guidePrompt}</span>
             </Button>
         </div>
@@ -382,12 +473,12 @@ function PoolsView({ poolList, title, guidePrompt, guideURL, onPoolSelected  }: 
 
             {pl.title && <div className='mt-4 mb-2 d-flex flex-row gap-2 align-items-center'>
                 <h5 className="pt-2">{pl.title}</h5>
-                <Button variant='link' onClick={()=>pl.guideUrl && window.open(pl.guideUrl)} >
+                <Button variant='link' onClick={() => pl.guideUrl && window.open(pl.guideUrl)} >
                     <span className="guide">{pl.title}</span>
                 </Button>
             </div>}
 
-            {pl.pools.map((p, poolIndex) => <div key={poolIndex} className="bg-secondary-mod my-2 ">
+            {pl.pools.map((p) => <div key={p.pId} className="bg-secondary-mod my-2 ">
 
                 <div className="d-flex flex-row gap-2 p-2 align-items-center">
 
@@ -415,28 +506,26 @@ function PoolsView({ poolList, title, guidePrompt, guideURL, onPoolSelected  }: 
 
                     <div className="flex-grow-1 text-center">
                         <small>Est. CZF/day</small>
-                        <h5>{formatCZfVal(p.czf)}</h5>
+                        <h5>{formatCZfVal(p.czfPerDay)}</h5>
                     </div>
 
                     <div className="flex-grow-1 text-center">
                         <small>Est. Harvestable</small>
-                        <h5>{formatCZfVal(p.harvestable)}</h5>
+                        <h5>{formatCZfVal(p.harvestableFn())}</h5>
                     </div>
 
                     <Button variant='link' onClick={() => {
-                        if (expandedPool?.poolIndex == poolIndex && expandedPool?.poolListIndex == poolListIndex) {
-                            setExpandedPool(undefined);
+                        if (expandedpId == p.pId) {
+                            setExpandedpId(undefined);
                         } else {
-                            setExpandedPool({ poolIndex, poolListIndex });
-                            
-                            onPoolSelected && onPoolSelected(p);
+                            setExpandedpId(p.pId);
                         }
                     }}>
                         <div className='poolBtn'></div>
                     </Button>
                 </div>
 
-                {expandedPool?.poolIndex == poolIndex && expandedPool?.poolListIndex == poolListIndex &&
+                {expandedpId  == p.pId &&
                     <div className="px-5"><Row className="poolViewActions p-4">
                         {(pl.actions || []).map((a, actionIndex) => <Col key={actionIndex} className="text-center">
                             <Button size="lg" variant='secondary' className="mx-3 flex-grow-1" onClick={() => {

@@ -54,9 +54,10 @@
     .high-yield-left{
         background-image: url('./rectangle-2.png');
         min-height: 15rem;
-        background-size: contain;
+        background-size: cover;
         background-repeat: no-repeat;
-        background-position: center bottom;
+        background-position: center top;
+        border-radius: 0.25rem;
 
         /*
         @include media-breakpoint-up(md){

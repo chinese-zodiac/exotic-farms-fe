@@ -78,26 +78,38 @@
         }
     }
 
-    .topBar{
+    @mixin dropdownMenuMixin {
+        display: flex;
+
+        &:hover, &:focus{
+            background-color: #7d7d934f;
+        }
+
+        span{
+            @include secondary-bg();
+            color: white;
+            border-radius: 0.25rem;
+            text-align: center;
+            flex-grow: 1;
+        }
+
+    }
+
+    
+    .dropdown{
+        .btn{
+            color:white;
+        }
+    }
+    
+
+    .topBar, .dropdown{
         .dropdown-menu{
             background-color: #131314;
             color:white;
 
             .dropdown-item{
-                display: flex;
-
-                &:hover, &:focus{
-                    background-color: #7d7d934f;
-                }
-
-                span{
-                    @include secondary-bg();
-                    color: white;
-                    border-radius: 0.25rem;
-                    text-align: center;
-                    flex-grow: 1;
-                }
-
+                @include dropdownMenuMixin();
             }
 
         }

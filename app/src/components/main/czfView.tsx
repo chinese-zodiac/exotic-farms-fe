@@ -20,7 +20,8 @@ export default function CZFView() {
 
   const [accounStat,setAccountStat] = useState<{
     vested:number;
-    czf:number;
+    czfPerDay:number;
+    harvastable:number;
   }>();
 
   const exoticPools = useExoticPools();
@@ -64,31 +65,27 @@ export default function CZFView() {
 
     const allPools = [...Object.keys(exoticPools.result).map(k => ((exoticPools.result || {})[k]).pools).flat(), ...chronoPools?.result];
 
-    const vested = allPools.map(p => {
-      return p.harvestable ? Number.parseFloat(p.harvestable) : 0;
-    }).reduce((a, b) => a + b);
+    const harvastable = allPools.map(p => p.harvestableFn()).reduce((a, b) => a + b);
+    const czfPerDay = allPools.map(p => p.czfPerDay).reduce((a, b) => a + b);
+    const vested = allPools.map(p => p.vested).reduce((a, b) => a + b);
 
-    const czf = allPools.map(p => {
-      return p.czf ? Number.parseFloat(p.czf) : 0;
-    }).reduce((a, b) => a + b);
-
-    setAccountStat({vested,czf});
+    setAccountStat({vested,czfPerDay,harvastable});
 
   }, [account, networkId, nounce, chronoPools?.result, exoticPools?.result]);
 
 
   const czfData = [
-      { val: formatCZfVal(czfBalance?.result), label: 'Your CZF' }, 
-      { val: formatCZfVal(accounStat?.czf), label: 'CZF/day' },
-      { val: '', label: 'Harvestable CZF' }, 
-      { val: formatCZfVal(accounStat?.vested), label: 'CZF Vesting' }
+      { val: formatCZfVal(czfBalance?.result), label: 'Your CZF', loading: czfBalance?.isLoading}, 
+      { val: formatCZfVal(accounStat?.czfPerDay), label: 'CZF/day', loading:undefined === accounStat },
+      { val: formatCZfVal(accounStat?.harvastable), label: 'Harvestable CZF', loading:undefined === accounStat }, 
+      { val: formatCZfVal(accounStat?.vested), label: 'CZF Vesting', loading:undefined === accounStat }
   ];
 
 
   return <Row className="gap-3">
     {czfData.map((d, i) => <Col key={i} sm className="bg-light-mod text-center py-3">
 
-      {czfBalance?.isLoading ? <Spinner animation="border" variant="primary" /> : <h4>{d.val}</h4>}
+      {d.loading ? <Spinner animation="border" variant="primary" /> : <h4>{d.val}</h4>}
 
       <div>{d.label}</div>
     </Col>)}

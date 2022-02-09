@@ -24,8 +24,6 @@ export default function MainContent() {
     //const web3Ctx = useweb3Context();
     const [loopAction, setLoopAction] = useState<CZActionProps>();
 
-    const [selectedPool, setSelectedPool] = useState<PoolProps>();
-
     const { connect, invalidDateBalance } = useConnectCalls();
     const [sumbitted, setSubmitted] = useState<IAsyncResult<TxModelProp>>();
 
@@ -247,7 +245,7 @@ export default function MainContent() {
             <Col md>
                 <div>
                     <h3 className="mb-3">Loop CZF For High Yield</h3>
-                    <LoopCZF {...{ selectedPool, onCZAction }} />
+                    <LoopCZF {...{  onCZAction }} />
                 </div>
             </Col>
         </Row>
@@ -287,9 +285,7 @@ export default function MainContent() {
             </Col>
         </Row>
 
-        <ChronoPools onCZAction={onCZAction} onPoolSelected={p => {
-            setSelectedPool(p);
-        }} />
+        <ChronoPools onCZAction={onCZAction} />
 
         <div className="my-5"></div>
 
