@@ -4,7 +4,7 @@
 
 - `fixed` Fastforwd: Show correct FastForward percentage (see app.czodiac.com/#/chronopools), "Don't show me this again" (see Figma)
 
-**I tried to match colors as they are displayed instead of CSS suggested by photoshop**
+**tried to match colors as they seem in photoshop  instead of suggested by figma CSS **
 
 
 - `fixed `Loop CZF for High yield: Display APR as percentage, Spacing, Color for CZF input form (see figma)
@@ -14,7 +14,7 @@
 
 - `scaled the button font for text to fit in a line to the best` Accordion buttons: Color, spacing, and border (see figma)
 
-**what UR do I link these to**
+**what URL do I link these to**
 - The Contracts are audited by audits.finance here.
 You may view the verified source code on BSCscan here.
 - The Contracts are audited by audits.finance here.
