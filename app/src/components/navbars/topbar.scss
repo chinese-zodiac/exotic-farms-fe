@@ -194,8 +194,11 @@
 }
 
 .disclaimerModel{
-  max-width: 23rem;
-  .modal-body{
-    padding: 0rem 1rem;
-  } 
+
+
+  @include media-breakpoint-down(sm){
+
+    max-width: 23rem;
+  
+  }
 }

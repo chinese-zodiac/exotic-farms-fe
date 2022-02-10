@@ -2,6 +2,13 @@
 @import "./darkMode.scss";
 @import "./lightMode.scss";
 
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/mixins";
+@import "~bootstrap/scss/utilities";
+
+
+
 @mixin app-styles {
   /*mix-blend-mode: multiply;  bad prop in figma */
   font-family: Poppins, sans-serif;
@@ -19,6 +26,31 @@
   @include app-styles();
   height: 100vh;
 }
+
+.modal-dialog{
+  @include media-breakpoint-up(lg) { 
+    max-width: 845px;
+   }
+
+}
+
+.modal-body{
+
+  padding: 0rem 1rem;
+
+  @include media-breakpoint-up(sm){
+    padding: 0rem 4rem;
+  }
+}
+
+.modal-header{
+  padding-bottom: 0.5rem;
+}
+
+.modal-footer{
+  padding-top: 0px;
+}
+
 
 .modal-content{
 

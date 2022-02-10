@@ -27,6 +27,8 @@ export default function MainContent() {
     const { connect, invalidDateBalance } = useConnectCalls();
     const [sumbitted, setSubmitted] = useState<IAsyncResult<TxModelProp>>();
 
+    const [showFFwarning, setShowFFwarning] = useState(true);
+
     const onCZAction = (p: CZActionProps) => {
         setLoopAction(p);
 
@@ -36,9 +38,13 @@ export default function MainContent() {
 
                 switch (p.type) {
 
-
+                    case 'ff75-lp':
                     case 'ff75-lp-confirmed':
                         {
+                            if('ff75-lp' == p.type && showFFwarning){
+                                break;
+                            }
+
                             setSubmitted({ isLoading: true });
                             const { web3, chainInfo, account } = await connect();
                             const exoticMaster: ExoticMaster = new web3.eth.Contract(ExoticMaster_JSON.abi as any, chainInfo.contracts.exoticMaster) as any;
@@ -51,6 +57,28 @@ export default function MainContent() {
 
                         }
                         break;
+
+                    case 'ff75':
+                    case 'ff75Confirmed':
+                        {
+                            if('ff75' == p.type && showFFwarning){
+                                break;
+                            }
+
+                            setSubmitted({ isLoading: true });
+                            const { web3, chainInfo, account } = await connect();
+                            const chronoPoolService: ChronoPoolService = new web3.eth.Contract(ChronoPoolService_JSON.abi as any, chainInfo.contracts.chronoPoolService) as any;
+
+                            const tx = await chronoPoolService.methods.claimAndFastForward(p.pId).send({
+                                from: account
+                            });
+
+                            setSubmitted({ result: { txHash: tx.transactionHash, chainInfo } });
+
+                        }
+                        break;
+
+
                     case 'harvestCZF-lp':
                         {
                             setSubmitted({ isLoading: true });
@@ -69,23 +97,8 @@ export default function MainContent() {
                     case 'buyCZF':
                         window.open('https://app.1inch.io/#/56/swap/BNB/0x7c1608C004F20c3520f70b924E2BfeF092dA0043');
                         break;
-                    case 'ff75Confirmed':
-                        {
-                            setSubmitted({ isLoading: true });
-                            const { web3, chainInfo, account } = await connect();
-                            const chronoPoolService: ChronoPoolService = new web3.eth.Contract(ChronoPoolService_JSON.abi as any, chainInfo.contracts.chronoPoolService) as any;
 
 
-                            //const h = await chronoPoolService.methods.getChronoPoolAccountInfo(account,p.pId).call();
-
-                            const tx = await chronoPoolService.methods.claimAndFastForward(p.pId).send({
-                                from: account
-                            });
-
-                            setSubmitted({ result: { txHash: tx.transactionHash, chainInfo } });
-
-                        }
-                        break;
                     case 'harvestAll':
                         {
                             setSubmitted({ isLoading: true });
@@ -154,23 +167,22 @@ export default function MainContent() {
                                 throw new Error('amount or percentage is required');
                             }
 
-                            debugger;
 
-                            if (p.exoticLp) {
+
+                            if (!!p.exotic) {
 
                                 if (undefined === p.percentage) {
                                     throw new Error('percentage is required');
                                 }
 
-                                if (undefined === p.lpBalance_eth) {
-                                    throw new Error('LP Balance is required');
+                                let depositAmount = p.exotic.lpBalance_Wei;
+
+                                if (p.percentage <= 99.9) {
+                                    const wadEther = (p.exotic.lpBalance_eth * p.percentage / 100.0);
+                                    depositAmount = web3.utils.toWei(wadEther.toString(), 'ether');
                                 }
 
-                                const bep20: CZFarm = new web3.eth.Contract(CZFarm_JSON.abi as any, p.exoticLp) as any;
-
-                                const wadEther = (p.lpBalance_eth * p.percentage / 100.0);
-
-                                const depositAmount = web3.utils.toWei(wadEther.toString(), 'ether');
+                                const bep20: CZFarm = new web3.eth.Contract(CZFarm_JSON.abi as any, p.exotic.lp) as any;
 
                                 const tx = await bep20.methods.approve(chainInfo.contracts.exoticMaster, depositAmount).send({
                                     from: account
@@ -180,33 +192,36 @@ export default function MainContent() {
                                 setSubmitted({ result: { txHash: tx.transactionHash, chainInfo } });
 
                             } else {
-                                let wadEther: string;
+                                let wad_wei: string;
 
                                 if (undefined !== p.percentage) {
+
                                     const czFarm: CZFarm = new web3.eth.Contract(CZFarm_JSON.abi as any, chainInfo.contracts.czFarm) as any;
                                     const currBalance_Wei = await czFarm.methods.balanceOf(account).call();
 
+                                    if (p.percentage >= 99.9) {
+                                        wad_wei = currBalance_Wei;
+                                    } else {
+                                        let wad = Number.parseFloat(web3.utils.fromWei(currBalance_Wei));
+                                        if (0 == wad) {
+                                            throw new Error('There is no CZF balance');
+                                        }
 
+                                        console.debug(`CZF Balance is ${currBalance_Wei} wei -> ${wad}`);
+                                        wad = (wad * p.percentage / 100.0);
 
-                                    let wad = Number.parseFloat(web3.utils.fromWei(currBalance_Wei));
-                                    if (0 == wad) {
-                                        throw new Error('There is no CZF balance');
+                                        wad_wei = web3.utils.toWei(wad.toString(), 'ether');
                                     }
-
-                                    console.debug(`CZF Balance is ${currBalance_Wei} wei -> ${wad}`);
-                                    wad = (wad * p.percentage / 100.0);
-
-                                    wadEther = wad.toString();
 
                                 } else {
                                     if (!p.amountEth) {
                                         throw new Error('amount is required');
                                     }
-                                    wadEther = p.amountEth;
+                                    wad_wei = web3.utils.toWei(p.amountEth, 'ether');
                                 }
 
                                 const chronoPoolService: ChronoPoolService = new web3.eth.Contract(ChronoPoolService_JSON.abi as any, chainInfo.contracts.chronoPoolService) as any;
-                                const tx = await chronoPoolService.methods.deposit(p.pId, web3.utils.toWei(wadEther, 'ether')).send({
+                                const tx = await chronoPoolService.methods.deposit(p.pId, wad_wei).send({
                                     from: account
                                 });
 
@@ -242,19 +257,25 @@ export default function MainContent() {
                 type: 'loopCZFConfirmed',
                 percentage,
                 pId: loopAction.pId,
-                exoticLp: loopAction.exoticLp,
-                lpBalance_eth: loopAction.lpBalance_eth
+                exotic: loopAction.exotic,
+
             })}
         />}
 
-        {loopAction?.type == 'ff75' && <FastForwardModal
+        {loopAction?.type == 'ff75' && showFFwarning && <FastForwardModal
             onClose={() => setLoopAction(undefined)}
-            onConfirm={() => onCZAction({ type: 'ff75Confirmed', pId: loopAction.pId })}
+            onConfirm={(showff) => {
+                setShowFFwarning(showff);
+                onCZAction({ type: 'ff75Confirmed', pId: loopAction.pId });
+            }}
         />}
 
-        {loopAction?.type == 'ff75-lp' && <FastForwardModal
+        {loopAction?.type == 'ff75-lp' && showFFwarning && <FastForwardModal
             onClose={() => setLoopAction(undefined)}
-            onConfirm={() => onCZAction({ type: 'ff75-lp-confirmed', pId: loopAction.pId })}
+            onConfirm={(showff) => {
+                setShowFFwarning(showff);
+                onCZAction({ type: 'ff75-lp-confirmed', pId: loopAction.pId });
+            }}
         />}
 
         <CZFView />

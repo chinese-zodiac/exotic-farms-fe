@@ -1,30 +1,30 @@
 .app-dark-mode {
 
     @mixin rounded-lght{
-        background-color: transparent;
+        background-color: #14101e;
         color:white;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid #4d4d59;
     }
 
     @mixin secondary-bg {
-        background-color: rgba(255, 255, 255, 0.15);
+        background-color: #3f4551;
     }
 
     @mixin inputs-colors {
         color: white;
-        background-color: #0E0E0E;
-        border-color: #cccccc91;
+        background-color: #373246;
+        border-color: #515362;
     }
 
     &.app{
-        background-color: rgba(6, 0, 11, 0.88);
+        background-color: #121212;
         color: white;
     }
       
 
     .mainContentHolder{
-        background-color: #0E0E0E;
-        background-image: url('./components/main/bg-img-dark.jpg');
+        background-color: #0f1626;
+        /*background-image: url('./components/main/bg-img-dark.jpg');*/
         background-repeat: no-repeat;
         background-size: cover;
     }

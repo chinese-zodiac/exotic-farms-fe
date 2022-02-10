@@ -317,20 +317,21 @@ export function useLoadPools() {
                             }
 
                             let lpBalance_eth = 0;
-                            let lpAllowance_eth =0;
+                            let lpAllowance_eth = 0;
+                            let lpBalance_Wei = '0';
 
-                             
-                            if(undefined !== account){
+
+                            if (undefined !== account) {
                                 const bep20: CZFarm = new web3ro.eth.Contract(CZFarm_JSON.abi as any, poolInfo.lp_) as any;
 
-                                const lpAllowance_Wei = await bep20.methods.allowance(account,chainInfo.contracts.exoticMaster).call();
-                                lpAllowance_eth = Number.parseFloat( web3ro.utils.fromWei(lpAllowance_Wei));
-                                
-                                const lpBalance_Wei = await bep20.methods.balanceOf(account).call();
-                                lpBalance_eth = Number.parseFloat( web3ro.utils.fromWei(lpBalance_Wei));
+                                const lpAllowance_Wei = await bep20.methods.allowance(account, chainInfo.contracts.exoticMaster).call();
+                                lpAllowance_eth = Number.parseFloat(web3ro.utils.fromWei(lpAllowance_Wei));
+
+                                lpBalance_Wei = await bep20.methods.balanceOf(account).call();
+                                lpBalance_eth = Number.parseFloat(web3ro.utils.fromWei(lpBalance_Wei));
                             }
-                            
-                            const lpProps = {...foundLpDef,lpBalance_eth,lpAllowance_eth};
+
+                            const lpProps = { ...foundLpDef, lpBalance_eth, lpAllowance_eth, lpBalance_Wei };
 
                             poolsMap[poolInfo.lp_] = {
                                 lpProps,
@@ -371,12 +372,12 @@ export function useLoadPools() {
     return { exoticPools, chronoPools };
 }
 
-function ApproveLP({ pool,lp }: { pool: PoolProps, lp?: PoolLpProps }){
+function ApproveLP({ pool, lp }: { pool: PoolProps, lp?: PoolLpProps }) {
 
 
-    useEffect(()=>{
+    useEffect(() => {
         console.debug(`applorve lop called`);
-    },[pool])
+    }, [pool])
 
     return <div>helo me {lp?.title}</div>;
 }
@@ -389,25 +390,31 @@ export function ExoticFarms({ onCZAction }: {
 
     const actions = [
         {
-            Component: ({ pool,lp }: { pool: PoolProps, lp?: PoolLpProps })=>{
+            Component: ({ pool, lp }: { pool: PoolProps, lp?: PoolLpProps }) => {
 
-                if(!lp || pool?.type != 'exoticfarm'){
+                if (!lp || pool?.type != 'exoticfarm') {
                     return <small className="text-danger">no LP</small>;
                 }
 
-                if(lp.lpAllowance_eth > 0 ){
+                if (lp.lpAllowance_eth > 0) {
                     return <Button size="lg" variant='secondary' className="mx-3 flex-grow-1" onClick={() => {
-                        onCZAction({ type: 'depositLP', pId: pool.pId, exoticLp: pool?.lp,amountEth:lp.lpAllowance_eth.toString() });
+                        onCZAction({ type: 'depositLP', pId: pool.pId, exoticLp: pool?.lp, amountEth: lp.lpAllowance_eth.toString() });
                     }}>
                         Deposit LP
                     </Button>
-                }else if(lp.lpBalance_eth >0 ){
+                } else if (lp.lpBalance_eth > 0) {
                     return <Button size="lg" variant='secondary' className="mx-3 flex-grow-1" onClick={() => {
-                        onCZAction({ type: 'loopCZF', pId: pool.pId, exoticLp: pool?.lp,lpBalance_eth:lp.lpBalance_eth });
+                        onCZAction({
+                            type: 'loopCZF', pId: pool.pId, exotic: {
+                                lp: pool?.lp,
+                                lpBalance_eth:lp.lpBalance_eth,
+                                lpBalance_Wei:lp.lpBalance_Wei
+                            }
+                        });
                     }}>
                         Approve LP
                     </Button>
-                }else{
+                } else {
                     return <Button size="lg" variant='secondary' className="mx-3 flex-grow-1" onClick={() => {
                         window.open(lp.guideUrl);
                     }}>
@@ -415,17 +422,10 @@ export function ExoticFarms({ onCZAction }: {
                     </Button>
                 }
 
-                
+
             },
             label: 'Approve LP', action: (pool: PoolProps) => {
-
-                if (pool?.type != 'exoticfarm') {
-                    throw new Error('incorrect pool type');
-                }
-                if (!pool?.lp) {
-                    throw new Error('pool LP is required');
-                }
-                onCZAction({ type: 'loopCZF', pId: pool.pId, exoticLp: pool?.lp });
+                ///not used
             }
         },
         { label: 'Harvest CZF', action: (p: PoolProps) => onCZAction({ type: 'harvestCZF-lp', pId: p.pId }) },
@@ -474,18 +474,18 @@ export function ExoticFarms({ onCZAction }: {
     />;
 }
 
-type PoolLpProps ={
+type PoolLpProps = {
     title: string;
     guideUrl: string;
-    lpBalance_eth: number; lpAllowance_eth: number;
+    lpBalance_eth: number; lpAllowance_eth: number; lpBalance_Wei :string;
     cashLogo: string;
 }
 
 type PoolListProps = {
-    lpProps?:PoolLpProps;
-    actions?: { 
-        Component?: (props: { pool: PoolProps, lp?: PoolLpProps }) => JSX.Element; 
-        label: string, action: (p: PoolProps) => any 
+    lpProps?: PoolLpProps;
+    actions?: {
+        Component?: (props: { pool: PoolProps, lp?: PoolLpProps }) => JSX.Element;
+        label: string, action: (p: PoolProps) => any
     }[]
     pools: PoolProps[]
 };
@@ -546,7 +546,7 @@ function PoolsView({ poolList, title, guidePrompt, guideURL }: {
                 </Button>
             </div>}
 
-            {pl.pools.map((p) => <div key={p.pId} className="bg-secondary-mod my-2 ">
+            {pl.pools.map((p) => <div key={p.pId} className="bg-secondary-mod my-4 poolRow ">
 
                 <div className="d-flex flex-row gap-2 p-2 align-items-center">
 
@@ -562,40 +562,42 @@ function PoolsView({ poolList, title, guidePrompt, guideURL }: {
 
                     </div>
 
-                    <div className="flex-grow-1 text-center">
+                    <div className="poolCol text-center">
                         <small>Duration</small>
                         <h5>{p.duration}</h5>
                     </div>
 
-                    <div className="flex-grow-1 text-center">
+                    <div className="poolCol text-center">
                         <small>APR</small>
                         <h5>{p.apr}%</h5>
                     </div>
 
-                    <div className="flex-grow-1 text-center">
+                    <div className="poolCol text-center">
                         <small>Est. CZF/day</small>
                         <h5>{formatCZfVal(p.czfPerDay)}</h5>
                     </div>
 
-                    <div className="flex-grow-1 text-center">
+                    <div className="poolCol text-center">
                         <small>Est. Harvestable</small>
                         <EstHarvest p={p} />
                     </div>
 
-                    <Button variant='link' onClick={() => {
+                    <Button variant='link'     onClick={() => {
                         if (expandedpId == p.pId) {
                             setExpandedpId(undefined);
                         } else {
                             setExpandedpId(p.pId);
                         }
                     }}>
-                        <div className='poolBtn'></div>
+                        <div className={'poolBtn ' +(expandedpId == p.pId?'expanded':'notExpanded')}></div>
                     </Button>
+
                 </div>
 
                 {expandedpId == p.pId &&
-                    <div className="px-5"><Row className="poolViewActions p-4">
-                        {(pl.actions || []).map((a, actionIndex) => <Col key={actionIndex} className="text-center">
+                    <div className="px-5"><Row  className="poolViewActions p-4">
+
+                        {(pl.actions || []).map((a, actionIndex) => <Col lg key={actionIndex} className="text-center m-1" >
 
                             {a.Component ? <a.Component pool={p} lp={pl.lpProps} /> :
                                 <Button size="lg" variant='secondary' className="mx-3 flex-grow-1" onClick={() => {

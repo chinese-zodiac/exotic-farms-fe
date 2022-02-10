@@ -1,3 +1,9 @@
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/mixins";
+@import "~bootstrap/scss/utilities";
+
+
 .poolsView {
 
     .guide {
@@ -41,6 +47,14 @@
 
     }
 
+    .poolCol{
+        flex:1;
+        flex-grow: 1;
+        flex-shrink: 1;
+        flex-basis: 0%;
+
+    }
+
     .poolBtn {
         width: 3rem;
         height: 3rem;
@@ -48,11 +62,20 @@
         background-size: contain;
         background-repeat: no-repeat;
         background-position: center;
+
+        &.expanded{
+            background-image:url('./arrow_right-up.png');
+        }
     }
 
     .poolViewActions {
         .btn {
             width: 90%;
+
+            @include media-breakpoint-up(lg){
+                font-size: 0.8vw;
+            }
+            
         }
     }
 
@@ -62,6 +85,11 @@
 .app-dark-mode {
 
     .poolsView {
+
+        .poolRow{
+            border:1px solid #5d6371;
+        }
+
         .guide {
             background-image: url('./diagonal-up.png');
 
@@ -72,7 +100,9 @@
         }
 
         .poolBtn{
-            background-image: url('./arrow_right.png');
+            &.notExpanded{
+                background-image: url('./arrow_right.png');
+            }
         }
 
     }
@@ -90,7 +120,9 @@
         }
 
         .poolBtn{
-            background-image: url('./arrow_right-1.png');
+            &.notExpanded{
+                background-image: url('./arrow_right-1.png');
+            }
         }
 
 

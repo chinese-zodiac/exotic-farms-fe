@@ -23,9 +23,9 @@ export type PoolProps = {
 
 export function FastForwardModal({ onClose, onConfirm }: {
     onClose: () => any;
-    onConfirm: () => any;
+    onConfirm: (showFFWarning:boolean) => any;
 }) {
-
+    const [showFFwarning, setShowFFwarning] = useState(true);
     const { darkMode } = useDisplayMode();
 
     return <Modal show centered onHide={() => onClose && onClose()}
@@ -35,7 +35,7 @@ export function FastForwardModal({ onClose, onConfirm }: {
             <Modal.Title>Warning!</Modal.Title>
         </Modal.Header>
 
-        <Modal.Body className="text-center m-5">
+        <Modal.Body>
 
             <p>
                 FastForward will cancel all your future vesting! You will only get 75.00% of the CZF you staked. Read more info at czodiac.gitbook.io
@@ -44,12 +44,27 @@ export function FastForwardModal({ onClose, onConfirm }: {
         </Modal.Body>
 
         <Modal.Footer>
-            <Button variant="primary" onClick={() => onConfirm()}>
-                OK
-            </Button>
-            <Button variant="secondary" onClick={() => onClose()}>
-                Cancel
-            </Button>
+
+            <div>
+                <div className="d-flex gap-2">
+
+                    <Button variant="primary" onClick={() => onConfirm(showFFwarning)}>
+                        OK
+                    </Button>
+                    <Button variant="secondary"  onClick={() => onClose()}>
+                        Cancel
+                    </Button>
+
+                </div>
+
+                <div className="mt-3">
+                    <Form.Check type='checkbox' id='noshow_cb' label='Don’t show me this again'
+                        checked={!showFFwarning}
+                        onClick={()=>setShowFFwarning(!showFFwarning)}
+                    />
+                </div>
+
+            </div>
         </Modal.Footer>
 
     </Modal>;
@@ -107,12 +122,18 @@ export function LoopModal({ onClose, onConfirm }: {
     </Modal>;
 }
 
+export type ExoticLpProps = {
+    lp: string;
+    lpBalance_eth: number;
+    lpBalance_Wei: string;
+}
+
 export type CZActionProps = { pId: number; } & ({
     type: 'loopCZF';
 
     //we are looping exoticWith lp
-    exoticLp?: string;
-    lpBalance_eth?: number;
+    exotic?: ExoticLpProps;
+
 } | {
     type: 'loopAllCZF';
 } | {
@@ -131,15 +152,16 @@ export type CZActionProps = { pId: number; } & ({
     type: 'loopCZFConfirmed';
     percentage?: number;
     amountEth?: string;
-    exoticLp?: string;
-    lpBalance_eth?: number;
+
+    exotic?: ExoticLpProps;
+
 } | {
     type: 'harvestCZF-lp';
 } | {
     type: 'ff75-lp';
 } | {
     type: 'ff75-lp-confirmed';
-}| {
+} | {
     type: 'depositLP';
     exoticLp: string;
     amountEth: string;
@@ -172,7 +194,7 @@ export function LoopCZF({ onCZAction }: {
 
     return <div className="bg-secondary-mod text-center p-4">
 
-        <h4>Loop CZF for {selectedPool.apr} APR</h4>
+        <h4>Loop CZF for {selectedPool.apr}% APR</h4>
 
         <div className="d-flex flex-row justify-content-center align-items-center">
             <h5 className="mt-2">CZF -&gt; CZF · </h5>
@@ -183,7 +205,7 @@ export function LoopCZF({ onCZAction }: {
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu>
-                    {(pools?.result||[]).map(p=><Dropdown.Item key={p.pId} onClick={()=>setSelectedPool(p)} >
+                    {(pools?.result || []).map(p => <Dropdown.Item key={p.pId} onClick={() => setSelectedPool(p)} >
                         <span>{p.duration}</span></Dropdown.Item>
                     )}
                 </Dropdown.Menu>
@@ -241,7 +263,7 @@ export function LoopCZF({ onCZAction }: {
 
         <Row className="my-3">
             <Col md className="d-flex">
-                <Button variant="light" size="lg" className="flex-grow-1 m-2" onClick={() => onCZAction({
+                <Button variant="secondary" size="lg" className="flex-grow-1 m-2" onClick={() => onCZAction({
                     type: 'harvestAll',
                     pId: selectedPool.pId
                 })}>
@@ -250,7 +272,7 @@ export function LoopCZF({ onCZAction }: {
             </Col>
 
             <Col md className="d-flex">
-                <Button variant="light" size="lg" className="flex-grow-1 m-2" onClick={() => onCZAction({
+                <Button variant="secondary" size="lg" className="flex-grow-1 m-2" onClick={() => onCZAction({
                     type: 'loopCZFConfirmed',
                     percentage: 100,
                     pId: selectedPool.pId
