@@ -141,12 +141,16 @@ function durationFromSeconds(vestPeriod_: string) {
 
 function fromPool(web3: Web3, { poolType, pId, accountInfo, poolInfo }: PoolRPCProps): PoolProps {
 
-    const apr = Number.parseInt(poolInfo.adjustedRateBasis_) / 100.0;
-
+    const ROI = Number.parseInt(poolInfo.adjustedRateBasis_) / 100.0;
 
     const m_duration = moment.duration(poolInfo.vestPeriod_, 'seconds');
+    const durtaionSeconds = m_duration.asSeconds();
     const durationDays = Math.ceil(m_duration.asDays());
     const durationMonths = Math.ceil(m_duration.asMonths());
+
+    
+
+    const apr = durtaionSeconds > 0 ? Number.parseFloat((ROI * (365 * 24 * 3600) /durtaionSeconds).toFixed(2)) :0;
 
     const partialYear = durationMonths % 12;
 
@@ -310,6 +314,8 @@ export function useLoadPools() {
 
                         if (!poolsMap[poolInfo.lp_]) {
 
+                            
+
                             const foundLpDef = _lpDefination[poolInfo.lp_];
 
                             if (!foundLpDef) {
@@ -398,6 +404,7 @@ export function ExoticFarms({ onCZAction }: {
 
                 if (lp.lpAllowance_eth > 0) {
                     return <Button size="lg" variant='secondary' className="mx-3 flex-grow-1" onClick={() => {
+                        
                         onCZAction({ type: 'depositLP', pId: pool.pId, exoticLp: pool?.lp, amountEth: lp.lpAllowance_eth.toString() });
                     }}>
                         Deposit LP

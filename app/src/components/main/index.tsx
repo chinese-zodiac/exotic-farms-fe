@@ -148,8 +148,8 @@ export default function MainContent() {
                         const { web3, chainInfo, account } = await connect();
 
                         const exoticMaster: ExoticMaster = new web3.eth.Contract(ExoticMaster_JSON.abi as any, chainInfo.contracts.exoticMaster) as any;
-
-                        const tx = await exoticMaster.methods.deposit(p.pId, p.amountEth).send({
+                        
+                        const tx = await exoticMaster.methods.deposit(p.pId, web3.utils.toWei(p.amountEth, 'ether')).send({
                             from: account
                         });
 
@@ -318,9 +318,9 @@ export default function MainContent() {
                 <h5>Security</h5>
                 <p>
                     The Contracts for CZF are scanned by automated testing bots to seek and destroy bugs. These automatic scripts protect the inner workings of the Time Machine for the safety of the Chrono Farmer.<br />
-                    You can view the code on Github here.<br />
-                    The Contracts are audited by audits.finance here.<br />
-                    You may view the verified source code on BSCscan here.
+                    You can view the code on <a target="_blank" href="https://github.com/chinese-zodiac/czodiac">Github here</a>.<br />
+                    The Contracts are audited by <a target="_blank" href="https://audits.finance/Audits/CZFarmAudit.pdf">audits.finance here</a>.<br />
+                    You may view the verified source code on <a target="_blank" href="https://bscscan.com/token/0x7c1608C004F20c3520f70b924E2BfeF092dA0043">BSCscan here</a>.
                 </p>
             </Col>
         </Row>

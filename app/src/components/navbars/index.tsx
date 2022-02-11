@@ -3,7 +3,7 @@ import { IAsyncResult } from '../utils';
 
 import './topbar.scss';
 
-import { Button, Dropdown, Modal, Spinner } from 'react-bootstrap';
+import { Button, Dropdown, Modal, Spinner, Form } from 'react-bootstrap';
 
 import { TxModal, useAccountCtx, useConnectCalls, supportedChains, TxModelProp } from '../web3';
 
@@ -12,11 +12,20 @@ import { useDisplayMode, formatCZfVal } from '../utils/display';
 import PAIR_ABI from '../../typechain/pair.json';
 const PCS_CZF_CZUSD_PAIR = '0x98b5F5E7Ec32cda1F3E89936c9972f92296aFE47';
 
+const NOSHOWDIS = "noShowDisclaimer";
 
 function DisclaimerModal({ onClose }: {
   onClose: () => any;
 }) {
   const { darkMode } = useDisplayMode();
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
+
+  useEffect(()=>{
+    const noShowDisclaimer = localStorage.getItem(NOSHOWDIS);
+    setShowDisclaimer(!noShowDisclaimer);
+
+  },[]);
+
   return <Modal show centered onHide={() => onClose && onClose()}
     contentClassName={"disclaimerModel " + (darkMode ? 'app-dark-mode' : 'app-light-mode')}>
 
@@ -33,9 +42,30 @@ function DisclaimerModal({ onClose }: {
     </Modal.Body>
 
     <Modal.Footer>
-      <Button variant="primary" onClick={() => onClose()}>
-        Ok, got it!
-      </Button>
+
+      <div className="d-flex flex-column">
+        <Button variant="primary" onClick={() => onClose()}>
+          Ok, got it!
+        </Button>
+
+
+
+      <div className="mt-3">
+        <Form.Check type='checkbox' id='noshow_cb' label='Don’t show me this again'
+          checked={!showDisclaimer}
+          onClick={() =>{
+            setShowDisclaimer(!showDisclaimer);
+            if(showDisclaimer){
+              localStorage.setItem(NOSHOWDIS, 'true');
+            }else{
+              localStorage.removeItem(NOSHOWDIS);
+            }
+          }}
+        />
+      </div>
+
+      </div>
+
     </Modal.Footer>
 
   </Modal>;
@@ -43,19 +73,27 @@ function DisclaimerModal({ onClose }: {
 
 export function BottomBar() {
 
-  const [showDisclaimer, setShowDisclaimer] = useState(true);
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
+
+  useEffect(() => {
+
+    const noShowDisclaimer = localStorage.getItem(NOSHOWDIS);
+    
+    setShowDisclaimer(!noShowDisclaimer);
+
+  }, []);
 
   const socials = [
     { action: 'twitter', url: 'https://twitter.com/zodiacs_c' },
     { action: 'telegram', url: 'https://t.me/CZodiacANN' },
-    { action: 'discord', url: 'https://discord.gg/FEpu3xF2Hb' },
+    { action: 'discord', url: 'https://discord.gg/QDyTJccdE9' },
     { action: 'medium', url: 'https://czodiacs.medium.com/' },
     { action: 'github', url: 'https://github.com/chinese-zodiac/czodiac' },
-    { action: 'image3', url: '' },
-    { action: 'image5', url: '' },
-    { action: 'image6', url: '' },
-    { action: 'image7', url: '' },
-    { action: 'bscScan', url: '' },
+    { action: 'image3', url: 'https://charts.bogged.finance/0x7c1608c004f20c3520f70b924e2bfef092da0043' },
+    { action: 'image5', url: 'https://www.coingecko.com/en/coins/czfarm' },
+    { action: 'image6', url: 'https://coinmarketcap.com/currencies/czfarm/' },
+    { action: 'image7', url: 'https://app.1inch.io/#/56/swap/BNB/0x7c1608C004F20c3520f70b924E2BfeF092dA0043' },
+    { action: 'bscScan', url: 'https://bscscan.com/token/0x7c1608C004F20c3520f70b924E2BfeF092dA0043' },
   ]
 
   const dBtn = (<Button variant="link" onClick={() => setShowDisclaimer(true)} >Read our Disclaimer</Button>);
@@ -124,17 +162,17 @@ export function Topbar() {
 
         const { web3ro } = await readOnly();
 
-        
+
         var pair = new web3ro.eth.Contract(PAIR_ABI as any, PCS_CZF_CZUSD_PAIR);
-        var reserves:{
+        var reserves: {
           _reserve0: string;
-          _reserve1:string;
+          _reserve1: string;
         } = await pair.methods.getReserves().call();
 
-        const resCzf = Number.parseFloat( web3ro.utils.fromWei(reserves._reserve0));
-        const resCzUSD = Number.parseFloat( web3ro.utils.fromWei(reserves._reserve1));
+        const resCzf = Number.parseFloat(web3ro.utils.fromWei(reserves._reserve0));
+        const resCzUSD = Number.parseFloat(web3ro.utils.fromWei(reserves._reserve1));
 
-        const result = ((resCzf>0 && resCzUSD>0 && resCzUSD/resCzf) || 0).toFixed(10);
+        const result = ((resCzf > 0 && resCzUSD > 0 && resCzUSD / resCzf) || 0).toFixed(10);
 
         setCzfPrice({ result });
 
@@ -147,17 +185,18 @@ export function Topbar() {
   }, [networkId]);
 
   const menu1 = <>
-            {czfPrice?.result && <Dropdown.Item href="#"><span>CZF {czfPrice.result}</span></Dropdown.Item>}
-            <Dropdown.Item href="#"><span>PancakeSwap</span></Dropdown.Item>
-            <Dropdown.Item onClick={() => window.open('https://app.1inch.io/#/56/swap/BNB/0x7c1608C004F20c3520f70b924E2BfeF092dA0043')}><span>1inch</span></Dropdown.Item>
-            <Dropdown.Item href="#"><span>Poocoin</span></Dropdown.Item>
+    
+    <Dropdown.Item onClick={() => window.open('https://pancakeswap.finance/info/token/0x7c1608c004f20c3520f70b924e2bfef092da0043')}><span>PancakeSwap</span></Dropdown.Item>
+    <Dropdown.Item onClick={() => window.open('https://app.1inch.io/#/56/swap/BNB/0x7c1608C004F20c3520f70b924E2BfeF092dA0043')}><span>1inch</span></Dropdown.Item>
+    <Dropdown.Item onClick={() => window.open('https://poocoin.app/tokens/0x7c1608c004f20c3520f70b924e2bfef092da0043')}><span>Poocoin</span></Dropdown.Item>
   </>;
 
   const menu2 = <>
-            <Dropdown.Item onClick={() => window.open('https://twitter.com/zodiacs_c')} ><span>Twitter</span></Dropdown.Item>
-            <Dropdown.Item onClick={() => window.open('https://t.me/CZodiacofficial')}><span>Telegram</span></Dropdown.Item>
-            <Dropdown.Item onClick={() => window.open('https://discord.gg/FEpu3xF2Hb')}><span>Discord</span></Dropdown.Item>
-            <Dropdown.Item onClick={() => window.open('https://czodiacs.medium.com/')}><span>Medium</span></Dropdown.Item>
+    <Dropdown.Item onClick={() => window.open('https://czodiac.gitbook.io/czodiac-litepapper/features-active/chrono-pools')} ><span>Whitepaper</span></Dropdown.Item>
+    <Dropdown.Item onClick={() => window.open('https://twitter.com/zodiacs_c')} ><span>Twitter</span></Dropdown.Item>
+    <Dropdown.Item onClick={() => window.open('https://t.me/CZodiacofficial')}><span>Telegram</span></Dropdown.Item>
+    <Dropdown.Item onClick={() => window.open('https://discord.gg/QDyTJccdE9')}><span>Discord</span></Dropdown.Item>
+    <Dropdown.Item onClick={() => window.open('https://czodiacs.medium.com/')}><span>Medium</span></Dropdown.Item>
   </>;
 
   return <div className='topBar d-flex flex-row justify-content-between pe-2  align-items-center'>
@@ -168,11 +207,13 @@ export function Topbar() {
 
       <div className='d-flex flex-row gap-1'>
 
-        <Button variant="light" className="lgOnly">
+        <Button variant="light" className="lgOnly" onClick={()=>{
+          window.open('https://app.1inch.io/#/56/swap/BNB/0x7c1608C004F20c3520f70b924E2BfeF092dA0043');
+        }}>
           {czfPrice?.isLoading && <Spinner animation="border" variant="info" size="sm" />}
-          {czfPrice?.result}
+          CZF ${czfPrice?.result}
         </Button>
-        
+
 
         <Dropdown className="lgOnly">
           <Dropdown.Toggle variant="secondary" id="dd-1">
@@ -192,7 +233,7 @@ export function Topbar() {
           </Dropdown.Toggle>
 
           <Dropdown.Menu>
-              {menu2}
+            {menu2}
           </Dropdown.Menu>
         </Dropdown>
 
