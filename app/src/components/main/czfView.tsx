@@ -1,16 +1,22 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAccountCtx, supportedChains, useConnectCalls } from '../web3';
 import './main.scss';
 import { Row, Col, Spinner } from "react-bootstrap";
 
 import {formatCZfVal} from '../utils/display';
-import { useExoticPools, useChronoPools } from '../pools';
+import { useFarmPools } from '../pools';
 import { IAsyncResult } from '../utils';
 
 
 import { CZFarm } from '../../typechain/CZFarm';
 import CZFarm_JSON from '../../typechain/CZFarm.json';
+
+type AccountStatProp = {
+  vested:number;
+  czfPerDay:number;
+  harvastable:number;
+};
 
 export default function CZFView() {
 
@@ -18,14 +24,11 @@ export default function CZFView() {
   const { readOnly, connect } = useConnectCalls();
   const [czfBalance, setCzfBalance] = useState<IAsyncResult<string>>();
 
-  const [accounStat,setAccountStat] = useState<{
-    vested:number;
-    czfPerDay:number;
-    harvastable:number;
-  }>();
+  const [accounStat,setAccountStat] = useState<AccountStatProp>();
+  const accountRef = useRef<AccountStatProp>();
 
-  const exoticPools = useExoticPools();
-  const chronoPools = useChronoPools();
+  const farmPools = useFarmPools();
+  
 
   useEffect(() => {
 
@@ -60,21 +63,25 @@ export default function CZFView() {
 
     const chainInfo = networkId && supportedChains.find(n => n.chainId == networkId) || undefined;
 
-    if (!chainInfo  || !chronoPools?.result || !exoticPools?.result) {
+    if (!chainInfo  || !farmPools?.result) {
       return;
     }
 
-    const allPools = [...Object.keys(exoticPools.result).map(k => ((exoticPools.result || {})[k]).pools).flat(), ...chronoPools?.result];
+    const allPools = [...Object.keys(farmPools.result.exoticPools)
+          .map(k => ((farmPools.result?.exoticPools || {})[k])
+          .pools).flat(), ...farmPools?.result.chronoPools];
 
     const czfPerDay = allPools.map(p => p.czfPerDay).reduce((a, b) => a + b);
     const vested = allPools.map(p => p.vested).reduce((a, b) => a + b);
 
-    setAccountStat({vested,czfPerDay,harvastable:0});
+    const stat = {vested,czfPerDay,harvastable:0};
+    setAccountStat(stat);
+    accountRef.current = stat;
 
     const harvestTimer = setInterval(()=>{
       
       const harvastable = allPools.map(p => p.harvestableFn()).reduce((a, b) => a + b);
-      accounStat && setAccountStat({...accounStat,harvastable});
+      accountRef.current && setAccountStat({...accountRef.current,harvastable});
 
       //console.debug(`harv updated : ${harvastable}`);
     },1000);
@@ -83,7 +90,7 @@ export default function CZFView() {
       clearInterval(harvestTimer);
     }
 
-  }, [networkId, nounce, chronoPools?.result, exoticPools?.result]);
+  }, [networkId, nounce, farmPools?.result]);
 
 
   const czfData = [

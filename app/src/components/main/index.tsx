@@ -41,7 +41,7 @@ export default function MainContent() {
                     case 'ff75-lp':
                     case 'ff75-lp-confirmed':
                         {
-                            if('ff75-lp' == p.type && showFFwarning){
+                            if ('ff75-lp' == p.type && showFFwarning) {
                                 break;
                             }
 
@@ -61,7 +61,7 @@ export default function MainContent() {
                     case 'ff75':
                     case 'ff75Confirmed':
                         {
-                            if('ff75' == p.type && showFFwarning){
+                            if ('ff75' == p.type && showFFwarning) {
                                 break;
                             }
 
@@ -143,13 +143,36 @@ export default function MainContent() {
                         }
                         break;
 
+                    case 'approveLP': {
+                        setSubmitted({ isLoading: true });
+                        const { web3, chainInfo, account } = await connect();
+
+                        const bep20: CZFarm = new web3.eth.Contract(CZFarm_JSON.abi as any, p.exoticLp) as any;
+
+                        //we are approving the max amount
+                        const tx = await bep20.methods.approve(chainInfo.contracts.exoticMaster, 
+                            '115792089237316195423570985008687907853269984665640564039457584007913129639935').send({
+                            from: account
+                        });
+
+                        setSubmitted({ result: { txHash: tx.transactionHash, chainInfo } });
+
+                    }
+                        break;
+
                     case 'depositLP': {
                         setSubmitted({ isLoading: true });
                         const { web3, chainInfo, account } = await connect();
 
                         const exoticMaster: ExoticMaster = new web3.eth.Contract(ExoticMaster_JSON.abi as any, chainInfo.contracts.exoticMaster) as any;
-                        
+
+                        /*
                         const tx = await exoticMaster.methods.deposit(p.pId, web3.utils.toWei(p.amountEth, 'ether')).send({
+                            from: account
+                        });*/
+
+                        console.log(`depositing :${p.amount_Wei}`);
+                        const tx = await exoticMaster.methods.deposit(p.pId, p.amount_Wei).send({
                             from: account
                         });
 

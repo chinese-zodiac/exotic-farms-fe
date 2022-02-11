@@ -46,7 +46,7 @@ export function ChronoPools({ onCZAction }: {
     onCZAction: (props: CZActionProps) => any;
 
 }) {
-    const pools = useChronoPools();
+    const pools = useFarmPools();
 
     /*
     const pool = {
@@ -72,7 +72,7 @@ export function ChronoPools({ onCZAction }: {
     }
 
     const pool = {
-        pools: pools?.result || [],
+        pools: pools?.result?.chronoPools || [],
         actions: [
             { label: 'Loop CZF', action: (p: PoolProps) => onCZAction({ type: 'loopCZF', pId: p.pId }) },
             { label: 'ReLoop CZF', action: (p: PoolProps) => onCZAction({ type: 'reloopCZF', pId: p.pId }) },
@@ -93,10 +93,9 @@ export function ChronoPools({ onCZAction }: {
 
 
 export const [PoolsProvider,
-    useExoticPools, useChronoPools] = constate(
+    useFarmPools] = constate(
         useLoadPools,
-        v => v.exoticPools,
-        v => v.chronoPools
+        v => v.farmPools
     );
 
 // props we get from the pool RPC methods
@@ -192,207 +191,219 @@ function fromPool(web3: Web3, { poolType, pId, accountInfo, poolInfo }: PoolRPCP
 export function useLoadPools() {
 
     const { readOnly } = useConnectCalls();
-    const [exoticPools, setExoticPools] = useState<IAsyncResult<{ [lp: string]: PoolListProps }>>({});
-    const [chronoPools, setChronoPools] = useState<IAsyncResult<PoolProps[]>>();
+
+    //const [exoticPools, setExoticPools] = useState<IAsyncResult<{ [lp: string]: PoolListProps }>>({});
+    //const [chronoPools, setChronoPools] = useState<IAsyncResult<PoolProps[]>>();
+
+    const [farmPools, setFarmPools] = useState<IAsyncResult<{ 
+        exoticPools:{ [lp: string]: PoolListProps };
+        chronoPools:PoolProps[]
+    }>>({});
+
     const { account, networkId, nounce } = useAccountCtx();
 
     useEffect(() => {
 
         (async () => {
             try {
-                setChronoPools({ isLoading: true });
-
-                const { web3ro, chainInfo } = await readOnly();
-
-                const chronoPoolService: ChronoPoolService = new web3ro.eth.Contract(ChronoPoolService_JSON.abi as any, chainInfo.contracts.chronoPoolService) as any;
-
-                let result: PoolProps[] = [];
-                //max 50 pools
-                for (let pId = 0; pId <= 50; pId++) {
-
-                    try {
-                        const poolInfo = await chronoPoolService.methods.getChronoPoolInfo(pId).call();
-                        const accountInfo = account && await chronoPoolService.methods.getChronoPoolAccountInfo(account, pId).call() || undefined;
-
-                        const pDetails = fromPool(web3ro, { pId, poolInfo, accountInfo, poolType: { type: 'chronoPool' } });
-                        if (!pDetails.apr) {
-                            console.log(`pid ${pDetails.pId} has 0 apr`);
-                            continue;
-                        }
-
-                        result.push(pDetails);
-
-                        /*
-
-                        const { duration, durationDays } = durationFromSeconds(poolInfo.vestPeriod_);
-                        const apr = Number.parseInt(poolInfo.adjustedRateBasis_) / 100.0;
-
-                        let czf = '';
-                        let harvestable = '';
-
-                        if (undefined !== account) {
-                            
-                            czf = web3ro.utils.fromWei(accountInfo.emissionRate_);
-                            harvestable = web3ro.utils.fromWei(accountInfo.totalVesting_);
-                        }
-
-                        result.push({ type: 'chronoPool', pId, duration, durationDays, apr, czfPerDay: czf, harvestableFn: harvestable });
-                        */
-
-                    } catch (error: any) {
-
-                        if (error.toString().includes('reverted')) {
-                            console.debug('no more pools');
-                            break;
-                        } else {
-                            throw error;
-                        }
-                    }
-                }
-
-                result = result.sort((a, b) => a.durationDays - b.durationDays);
-
-                /*
-                if(result.length>0 && onPoolSelected){
-                    onPoolSelected(result[0]);
-                }
-                */
-
-                setChronoPools({ result });
-
-            } catch (error: any) {
-                setChronoPools({ error });
-            }
-
-        })();
-    }, [account, networkId, nounce]);
-
-    useEffect(() => {
-
-        (async () => {
-            try {
-                setExoticPools({ isLoading: true });
-
-                const { web3ro, chainInfo } = await readOnly();
-
-                const exoticMaster: ExoticMaster = new web3ro.eth.Contract(ExoticMaster_JSON.abi as any, chainInfo.contracts.exoticMaster) as any;
-
-                const poolsMap: { [lp: string]: PoolListProps } = {};
-
-                //max 50 pools
-                for (let pId = 0; pId <= 50; pId++) {
-
-                    try {
-
-                        //const k = await exoticMaster.methods.getCzfPerLPWad(pId).call();
-
-                        const poolInfo = await exoticMaster.methods.getExoticFarmInfo(pId).call();
-                        const accountInfo = account && await exoticMaster.methods.getExoticFarmAccountInfo(account, pId).call() || undefined;
-
-                        const pDetails = fromPool(web3ro, { pId, poolInfo, accountInfo, poolType: { type: 'exoticfarm', lp: poolInfo.lp_ } });
-                        if (!pDetails.apr) {
-                            console.log(`pid ${pDetails.pId} has 0 apr`);
-                            continue;
-                        }
 
 
-                        /*
-                        const { duration, durationDays } = durationFromSeconds(poolInfo.vestPeriod_);
-                        const apr = Number.parseInt(poolInfo.adjustedRateBasis_) / 100.0;
+                const loadChronoPools = async ()=>{
+                    //setChronoPools({ isLoading: true });
 
-                        let czf = '';
-                        let harvestable = '';
-
-                        if (undefined !== account) {
-                            
-                            czf = web3ro.utils.fromWei(accountInfo.emissionRate_);
-                            harvestable = web3ro.utils.fromWei(accountInfo.totalVesting_);
-
-
-                        }
-                        */
-
-                        if (!poolsMap[poolInfo.lp_]) {
-
-                            
-
-                            const foundLpDef = _lpDefination[poolInfo.lp_];
-
-                            if (!foundLpDef) {
-                                throw new Error(`Unknown LP ${poolInfo.lp_}`);
+                    const { web3ro, chainInfo } = await readOnly();
+    
+                    const chronoPoolService: ChronoPoolService = new web3ro.eth.Contract(ChronoPoolService_JSON.abi as any, chainInfo.contracts.chronoPoolService) as any;
+    
+                    let result: PoolProps[] = [];
+                    //max 50 pools
+                    for (let pId = 0; pId <= 50; pId++) {
+    
+                        try {
+                            const poolInfo = await chronoPoolService.methods.getChronoPoolInfo(pId).call();
+                            const accountInfo = account && await chronoPoolService.methods.getChronoPoolAccountInfo(account, pId).call() || undefined;
+    
+                            const pDetails = fromPool(web3ro, { pId, poolInfo, accountInfo, poolType: { type: 'chronoPool' } });
+                            if (!pDetails.apr) {
+                                console.log(`pid ${pDetails.pId} has 0 apr`);
+                                continue;
                             }
-
-                            let lpBalance_eth = 0;
-                            let lpAllowance_eth = 0;
-                            let lpBalance_Wei = '0';
-
-
+    
+                            result.push(pDetails);
+    
+                            /*
+    
+                            const { duration, durationDays } = durationFromSeconds(poolInfo.vestPeriod_);
+                            const apr = Number.parseInt(poolInfo.adjustedRateBasis_) / 100.0;
+    
+                            let czf = '';
+                            let harvestable = '';
+    
                             if (undefined !== account) {
-                                const bep20: CZFarm = new web3ro.eth.Contract(CZFarm_JSON.abi as any, poolInfo.lp_) as any;
-
-                                const lpAllowance_Wei = await bep20.methods.allowance(account, chainInfo.contracts.exoticMaster).call();
-                                lpAllowance_eth = Number.parseFloat(web3ro.utils.fromWei(lpAllowance_Wei));
-
-                                lpBalance_Wei = await bep20.methods.balanceOf(account).call();
-                                lpBalance_eth = Number.parseFloat(web3ro.utils.fromWei(lpBalance_Wei));
+                                
+                                czf = web3ro.utils.fromWei(accountInfo.emissionRate_);
+                                harvestable = web3ro.utils.fromWei(accountInfo.totalVesting_);
                             }
-
-                            const lpProps = { ...foundLpDef, lpBalance_eth, lpAllowance_eth, lpBalance_Wei };
-
-                            poolsMap[poolInfo.lp_] = {
-                                lpProps,
-                                pools: [],
-                            };
-                        }
-
-                        poolsMap[poolInfo.lp_].pools.push(pDetails);
-
-                        //poolsMap[poolInfo.lp_].pools.push({ type: 'exoticfarm', lp: poolInfo.lp_, pId, duration, durationDays, apr, czfPerDay: czf, harvestableFn: harvestable });
-
-                    } catch (error: any) {
-
-                        if (error.toString().includes('reverted')) {
-                            console.debug('no more exotic pools');
-                            break;
-                        } else {
-                            throw error;
+    
+                            result.push({ type: 'chronoPool', pId, duration, durationDays, apr, czfPerDay: czf, harvestableFn: harvestable });
+                            */
+    
+                        } catch (error: any) {
+    
+                            if (error.toString().includes('reverted')) {
+                                console.debug('no more pools');
+                                break;
+                            } else {
+                                throw error;
+                            }
                         }
                     }
+    
+                    result = result.sort((a, b) => a.durationDays - b.durationDays);
+    
+                    /*
+                    if(result.length>0 && onPoolSelected){
+                        onPoolSelected(result[0]);
+                    }
+                    */
+    
+                    //setChronoPools({ result });
+
+                    return result;
+    
                 }
 
-                Object.keys(poolsMap).forEach(k => {
-                    poolsMap[k].pools = poolsMap[k].pools.sort((a, b) => a.durationDays - b.durationDays);
-                });
+                const loadExoticPools = async () => {
+                    //setExoticPools({ isLoading: true });
 
+                    const { web3ro, chainInfo } = await readOnly();
+    
+                    const exoticMaster: ExoticMaster = new web3ro.eth.Contract(ExoticMaster_JSON.abi as any, chainInfo.contracts.exoticMaster) as any;
+    
+                    const poolsMap: { [lp: string]: PoolListProps } = {};
+    
+                    //max 50 pools
+                    for (let pId = 0; pId <= 50; pId++) {
+    
+                        try {
+    
+                            //const k = await exoticMaster.methods.getCzfPerLPWad(pId).call();
+    
+                            const poolInfo = await exoticMaster.methods.getExoticFarmInfo(pId).call();
+                            const accountInfo = account && await exoticMaster.methods.getExoticFarmAccountInfo(account, pId).call() || undefined;
+    
+                            const pDetails = fromPool(web3ro, { pId, poolInfo, accountInfo, poolType: { type: 'exoticfarm', lp: poolInfo.lp_ } });
+                            if (!pDetails.apr) {
+                                console.log(`pid ${pDetails.pId} has 0 apr`);
+                                continue;
+                            }
+    
+    
+                            /*
+                            const { duration, durationDays } = durationFromSeconds(poolInfo.vestPeriod_);
+                            const apr = Number.parseInt(poolInfo.adjustedRateBasis_) / 100.0;
+    
+                            let czf = '';
+                            let harvestable = '';
+    
+                            if (undefined !== account) {
+                                
+                                czf = web3ro.utils.fromWei(accountInfo.emissionRate_);
+                                harvestable = web3ro.utils.fromWei(accountInfo.totalVesting_);
+    
+    
+                            }
+                            */
+    
+                            if (!poolsMap[poolInfo.lp_]) {
+    
+                                
+    
+                                const foundLpDef = _lpDefination[poolInfo.lp_];
+    
+                                if (!foundLpDef) {
+                                    throw new Error(`Unknown LP ${poolInfo.lp_}`);
+                                }
+    
+                                let lpBalance_eth = 0;
+                                let lpAllowance_eth = 0;
+                                let lpBalance_Wei = '0';
+                                let lpAllowance_Wei ='0';
+    
+    
+                                if (undefined !== account) {
+                                    const bep20: CZFarm = new web3ro.eth.Contract(CZFarm_JSON.abi as any, poolInfo.lp_) as any;
+    
+                                    lpAllowance_Wei = await bep20.methods.allowance(account, chainInfo.contracts.exoticMaster).call();
+                                    lpBalance_Wei = await bep20.methods.balanceOf(account).call();
+    
+                                    lpAllowance_eth = Number.parseFloat(web3ro.utils.fromWei(lpAllowance_Wei));
+    
+                                    lpBalance_eth = Number.parseFloat(web3ro.utils.fromWei(lpBalance_Wei));
+    
+                                    console.log(`lpAllowance_Wei = ${lpAllowance_Wei}, lpBalance_Wei=${lpBalance_Wei}`);
+                                }
+    
+                                const lpProps = { ...foundLpDef, lpBalance_eth, lpAllowance_Wei,lpAllowance_eth, lpBalance_Wei };
+    
+                                poolsMap[poolInfo.lp_] = {
+                                    lpProps,
+                                    pools: [],
+                                };
+                            }
+    
+                            poolsMap[poolInfo.lp_].pools.push(pDetails);
+    
+                            //poolsMap[poolInfo.lp_].pools.push({ type: 'exoticfarm', lp: poolInfo.lp_, pId, duration, durationDays, apr, czfPerDay: czf, harvestableFn: harvestable });
+    
+                        } catch (error: any) {
+    
+                            if (error.toString().includes('reverted')) {
+                                console.debug('no more exotic pools');
+                                break;
+                            } else {
+                                throw error;
+                            }
+                        }
+                    }
+    
+                    Object.keys(poolsMap).forEach(k => {
+                        poolsMap[k].pools = poolsMap[k].pools.sort((a, b) => a.durationDays - b.durationDays);
+                    });
+    
+    
+                    //setPools({ result: Object.keys(poolsMap).map(k=>poolsMap[k])  });
+                    //setExoticPools({ result: poolsMap });
+                    return poolsMap;
+    
+                }
 
-                //setPools({ result: Object.keys(poolsMap).map(k=>poolsMap[k])  });
-                setExoticPools({ result: poolsMap });
+                setFarmPools({isLoading:true});
+
+                const chronoPools = await loadChronoPools();
+                const exoticPools = await loadExoticPools();
+
+                setFarmPools({result:{chronoPools,exoticPools}});
 
             } catch (error: any) {
-                setExoticPools({ error });
+                //setChronoPools({ error });
+                //setExoticPools({ error });
             }
 
         })();
     }, [account, networkId, nounce]);
 
-    return { exoticPools, chronoPools };
+    return {farmPools};
+    //return { exoticPools, chronoPools };
 }
 
-function ApproveLP({ pool, lp }: { pool: PoolProps, lp?: PoolLpProps }) {
-
-
-    useEffect(() => {
-        console.debug(`applorve lop called`);
-    }, [pool])
-
-    return <div>helo me {lp?.title}</div>;
-}
 
 export function ExoticFarms({ onCZAction }: {
     onCZAction: (props: CZActionProps) => any;
 }) {
 
-    const pools = useExoticPools();
+
+    const poolsAsync = useFarmPools();
 
     const actions = [
         {
@@ -404,20 +415,24 @@ export function ExoticFarms({ onCZAction }: {
 
                 if (lp.lpAllowance_eth > 0) {
                     return <Button size="lg" variant='secondary' className="mx-3 flex-grow-1" onClick={() => {
+
+                        console.log(`lpAllowance_Wei = ${lp.lpAllowance_Wei}`);
                         
-                        onCZAction({ type: 'depositLP', pId: pool.pId, exoticLp: pool?.lp, amountEth: lp.lpAllowance_eth.toString() });
+                        //onCZAction({ type: 'depositLP', pId: pool.pId, exoticLp: pool?.lp, amountEth: lp.lpAllowance_eth.toString() });
+                        onCZAction({ type: 'depositLP', pId: pool.pId, exoticLp: pool?.lp, amount_Wei: lp.lpBalance_Wei });
                     }}>
                         Deposit LP
                     </Button>
                 } else if (lp.lpBalance_eth > 0) {
                     return <Button size="lg" variant='secondary' className="mx-3 flex-grow-1" onClick={() => {
-                        onCZAction({
+                        /*onCZAction({
                             type: 'loopCZF', pId: pool.pId, exotic: {
                                 lp: pool?.lp,
                                 lpBalance_eth:lp.lpBalance_eth,
                                 lpBalance_Wei:lp.lpBalance_Wei
                             }
-                        });
+                        });*/
+                        onCZAction({ type: 'approveLP', pId: pool.pId, exoticLp: pool?.lp });
                     }}>
                         Approve LP
                     </Button>
@@ -463,16 +478,16 @@ export function ExoticFarms({ onCZAction }: {
     ];
     */
 
-    if (pools?.isLoading) {
+    if (poolsAsync?.isLoading) {
         return <Spinner animation="border" variant="primary" />;
     }
 
-    if (pools?.error) {
-        return <ShowError error={pools?.error} />;
+    if (poolsAsync?.error) {
+        return <ShowError error={poolsAsync?.error} />;
     }
 
-    const poolList = pools.result && Object.keys(pools.result).map(k => {
-        return { ...((pools.result || {})[k]), actions };
+    const poolList = poolsAsync.result?.exoticPools && Object.keys(poolsAsync.result?.exoticPools).map(k => {
+        return { ...((poolsAsync.result?.exoticPools || {})[k]), actions };
     }) || [];
 
     return <PoolsView poolList={poolList || []}
@@ -484,7 +499,7 @@ export function ExoticFarms({ onCZAction }: {
 type PoolLpProps = {
     title: string;
     guideUrl: string;
-    lpBalance_eth: number; lpAllowance_eth: number; lpBalance_Wei :string;
+    lpBalance_eth: number; lpAllowance_eth:number; lpAllowance_Wei: string; lpBalance_Wei :string;
     cashLogo: string;
 }
 

@@ -6,7 +6,7 @@ import {
 
 import { useDisplayMode } from '../utils/display';
 
-import { useChronoPools } from '../pools';
+import { useFarmPools } from '../pools';
 
 export type PoolTypeProps = { type: 'chronoPool' } | { type: 'exoticfarm', lp: string; };
 
@@ -164,20 +164,23 @@ export type CZActionProps = { pId: number; } & ({
 } | {
     type: 'depositLP';
     exoticLp: string;
-    amountEth: string;
+    amount_Wei: string;
+}| {
+    type: 'approveLP';
+    exoticLp: string;
 }
 );
 
 export function LoopCZF({ onCZAction }: {
     onCZAction: (props: CZActionProps) => any;
 }) {
-    const pools = useChronoPools();
+    const pools = useFarmPools();
     const [loopAmount, setLoopAmount] = useState<string>();
     const [selectedPool, setSelectedPool] = useState<PoolProps>();
 
     useEffect(() => {
 
-        const firstOne = pools?.result && pools?.result.length > 0 && pools?.result[0] || undefined;
+        const firstOne = pools?.result && pools?.result.chronoPools.length > 0 && pools?.result.chronoPools[0] || undefined;
         if (firstOne) {
             setSelectedPool(firstOne);
         }
@@ -205,7 +208,7 @@ export function LoopCZF({ onCZAction }: {
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu>
-                    {(pools?.result || []).map(p => <Dropdown.Item key={p.pId} onClick={() => setSelectedPool(p)} >
+                    {(pools?.result?.chronoPools || []).map(p => <Dropdown.Item key={p.pId} onClick={() => setSelectedPool(p)} >
                         <span>{p.duration}</span></Dropdown.Item>
                     )}
                 </Dropdown.Menu>
