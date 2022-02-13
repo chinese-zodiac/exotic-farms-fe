@@ -415,9 +415,6 @@ export function ExoticFarms({ onCZAction }: {
 
                 if (lp.lpAllowance_eth > 0) {
                     return <Button size="lg" variant='secondary' className="mx-3 flex-grow-1" onClick={() => {
-
-                        console.log(`lpAllowance_Wei = ${lp.lpAllowance_Wei}`);
-                        
                         //onCZAction({ type: 'depositLP', pId: pool.pId, exoticLp: pool?.lp, amountEth: lp.lpAllowance_eth.toString() });
                         onCZAction({ type: 'depositLP', pId: pool.pId, exoticLp: pool?.lp, amount_Wei: lp.lpBalance_Wei });
                     }}>

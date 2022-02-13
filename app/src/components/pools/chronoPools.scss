@@ -47,11 +47,25 @@
 
     }
 
+    .poolRow{
+        font-size:12px;
+
+        @include media-breakpoint-up(md){
+            font-size:16px;
+        }
+
+    }
+
     .poolCol{
         flex:1;
         flex-grow: 1;
         flex-shrink: 1;
         flex-basis: 0%;
+
+
+        h5{
+            font-size: 1.25em;
+        }
 
     }
 
