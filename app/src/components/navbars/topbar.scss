@@ -115,9 +115,10 @@
   .networkBtn {
     background-image: url('./right-icon.png');
     height: 1.5em;
+    display:inline-block;
     background-repeat: no-repeat;
     background-position: right;
-    padding-right: 1.5em;
+    padding-right: 2em;
     background-size: contain;
   }
 
@@ -224,7 +225,7 @@
 
   @include media-breakpoint-down(sm){
 
-    max-width: 23em;
+    max-width: 23rem;
   
   }
 }

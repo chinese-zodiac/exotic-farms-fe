@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,500;1,600;1,700;1,800;1,900&display=swap');
 @import "./darkMode.scss";
 @import "./lightMode.scss";
 
@@ -12,6 +12,7 @@
 @mixin app-styles {
   /*mix-blend-mode: multiply;  bad prop in figma */
   font-family: Poppins, sans-serif;
+  font-weight: 300;
   .btn{
     border-radius: 50rem;
   }
@@ -19,12 +20,20 @@
   .bg-light-mod, .bg-secondary-mod, .bg-secondary-mod-1{
     border-radius: 1rem;
   }
+
+  @include media-breakpoint-down(sm) {
+      h3,h4,h5,p{
+        padding-left:0.5rem;
+        padding-top:0.5rem;
+      }
+    }
   
 }
 
 .app{
   @include app-styles();
   height: 100vh;
+  overflow-x: hidden;;
 }
 
 .modal-dialog{
@@ -66,15 +75,15 @@
   .modal-footer{
     justify-content: center;
     border-top: 0;
-
-    .btn{
-      padding: 0.3rem 2rem 0.2rem;
-    }
   }
 
   .modal-header{
     border-bottom: 0;
     justify-content: center;
+  }
+
+  .modal-title{
+    font-weight:600;
   }
 }
 

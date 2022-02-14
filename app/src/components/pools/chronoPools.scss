@@ -139,6 +139,13 @@
 
         .poolRow{
             border:1px solid #5d6371;
+            @include media-breakpoint-down(sm){
+                border-radius:0px;
+            }
+
+            small {
+                color:#a4a8b4
+            }
         }
 
         .guide {
@@ -147,7 +154,7 @@
         }
 
         .poolViewActions {
-            border-top: 0.2rem solid white;
+            border-top: 2px solid #5d6371;
         }
 
         .poolBtn{
@@ -161,13 +168,24 @@
 
 .app-light-mode {
     .poolsView {
+
+        .poolRow{
+            @include media-breakpoint-down(sm){
+                border-radius:0px;
+            }
+
+            small {
+                color:#5d6371
+            }
+        }
+
         .guide {
             background-image: url('./diagonal-up-light.png');
 
         }
 
         .poolViewActions {
-            border-top: 0.2rem solid rgba(0, 0, 0, 0.15);
+            border-top: 2px solid rgba(0, 0, 0, 0.15);
         }
 
         .poolBtn{

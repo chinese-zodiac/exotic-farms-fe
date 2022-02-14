@@ -260,10 +260,6 @@ export function Topbar() {
           Connect
         </Button>
 
-        <Button variant="secondary modeswitch" onClick={() => toggleDisplay()} className="lgOnly">
-          <div className="icon">&nbsp;</div>
-        </Button>
-
         <Dropdown className="settings">
 
           <Dropdown.Toggle variant="secondary" id="dd-3">
@@ -278,6 +274,10 @@ export function Topbar() {
 
           </Dropdown.Menu>
         </Dropdown>
+
+        <Button variant="secondary modeswitch" onClick={() => toggleDisplay()}>
+          <div className="icon">&nbsp;</div>
+        </Button>
 
 
       </div>
