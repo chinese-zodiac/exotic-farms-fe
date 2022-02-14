@@ -83,32 +83,46 @@
 
 
 .topBar {
-  padding: 1.25rem 3rem;
+  padding: 1.25em 3em;
+
+  font-size: 8px;
+
+  @include media-breakpoint-up(md){
+    font-size: 12px;
+  }
+
+  @include media-breakpoint-up(lg){
+    font-size: 16px;
+  }
+
+  .btn{
+    font-size: 1em;
+  }
 
   .logo {
-    font-size: 1.5rem;
-    height: 3.5rem;
+    font-size: 1.5em;
+    height: 3.5em;
     background-image: url('./image2.png');
     background-repeat: no-repeat;
     background-size: contain;
 
     span {
-      margin-left: 3.5rem;
-      padding: 0 0.75rem;
+      margin-left: 3.5em;
+      padding: 0 0.75em;
     }
   }
 
   .networkBtn {
     background-image: url('./right-icon.png');
-    height: 1.5rem;
+    height: 1.5em;
     background-repeat: no-repeat;
     background-position: right;
-    padding-right: 1.5rem;
+    padding-right: 1.5em;
     background-size: contain;
   }
 
   .modeswitch {
-    padding: 0.2rem;
+    padding: 0.2em;
 
     .icon {
 
@@ -116,15 +130,15 @@
       background-repeat: no-repeat;
       background-size: contain;
       background-position: center;
-      width: 2rem;
-      height: 2rem;
+      width: 2em;
+      height: 2em;
 
     }
 
   }
 
   .settings {
-    padding: 0.2rem;
+    padding: 0.2em;
     display: block;
 
     .dropdown-toggle{
@@ -144,8 +158,8 @@
       background-repeat: no-repeat;
       background-size: contain;
       background-position: center;
-      width: 2rem;
-      height: 2rem;
+      width: 2em;
+      height: 2em;
 
     }
 
@@ -162,13 +176,25 @@
 
 .bottomBar{
 
+  
+
+  
+
   .soBtnHolder{
+
     .soBtn{
       background-repeat: no-repeat;
       background-size: contain;
       background-position: center;
-      width: 1.2rem;
-      height: 1.2rem;
+      width: 0.8em;
+      height: 0.8em;
+
+      @include media-breakpoint-up(md){
+        width: 1.2em;
+        height: 1.2em;
+      
+      }
+
     }
  
   }
@@ -198,7 +224,7 @@
 
   @include media-breakpoint-down(sm){
 
-    max-width: 23rem;
+    max-width: 23em;
   
   }
 }

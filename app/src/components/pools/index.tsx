@@ -415,9 +415,6 @@ export function ExoticFarms({ onCZAction }: {
 
                 if (lp.lpAllowance_eth > 0) {
                     return <Button size="lg" variant='secondary' className="mx-3 flex-grow-1" onClick={() => {
-
-                        console.log(`lpAllowance_Wei = ${lp.lpAllowance_Wei}`);
-                        
                         //onCZAction({ type: 'depositLP', pId: pool.pId, exoticLp: pool?.lp, amountEth: lp.lpAllowance_eth.toString() });
                         onCZAction({ type: 'depositLP', pId: pool.pId, exoticLp: pool?.lp, amount_Wei: lp.lpBalance_Wei });
                     }}>
@@ -549,7 +546,7 @@ function PoolsView({ poolList, title, guidePrompt, guideURL }: {
         }
     }, [poolList]);
 
-    return <div className="bg-secondary-mod-1 poolsView p-3">
+    return <div className="bg-secondary-mod-1 poolsView">
 
         <div className="d-flex flex-row justify-content-between">
             <h4>{title}</h4>
@@ -561,16 +558,16 @@ function PoolsView({ poolList, title, guidePrompt, guideURL }: {
 
         {poolList.map((pl, poolListIndex) => <div key={poolListIndex}>
 
-            {pl.lpProps?.title && <div className='mt-4 mb-2 d-flex flex-row gap-2 align-items-center'>
+            {pl.lpProps?.title && <div className='mt-4 mb-2 d-flex flex-row align-items-center'>
                 <h5 className="pt-2">{pl.lpProps.title}</h5>
                 <Button variant='link' onClick={() => pl.lpProps?.guideUrl && window.open(pl.lpProps?.guideUrl)} >
                     <span className="guide">{pl.lpProps.title}</span>
                 </Button>
             </div>}
 
-            {pl.pools.map((p) => <div key={p.pId} className="bg-secondary-mod my-4 poolRow ">
+            {pl.pools.map((p) => <div key={p.pId} className="bg-secondary-mod poolRow ">
 
-                <div className="d-flex flex-row gap-2 p-2 align-items-center">
+                <div className="d-flex flex-row gap-2 align-items-center">
 
                     <div>
                         <div className="poolLogo bg-secondary-mod-1">
@@ -604,7 +601,7 @@ function PoolsView({ poolList, title, guidePrompt, guideURL }: {
                         <EstHarvest p={p} />
                     </div>
 
-                    <Button variant='link'     onClick={() => {
+                    <Button variant='link'  className="poolColBtn"    onClick={() => {
                         if (expandedpId == p.pId) {
                             setExpandedpId(undefined);
                         } else {
