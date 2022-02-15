@@ -77,7 +77,8 @@ export function ChronoPools({ onCZAction }: {
             { label: 'Loop CZF', action: (p: PoolProps) => onCZAction({ type: 'loopCZF', pId: p.pId }) },
             { label: 'ReLoop CZF', action: (p: PoolProps) => onCZAction({ type: 'reloopCZF', pId: p.pId }) },
             { label: 'Harvest CZF', action: (p: PoolProps) => onCZAction({ type: 'harvestCZF', pId: p.pId }) },
-            { label: 'Fast Foward 75.00%', action: (p: PoolProps) => onCZAction({ type: 'ff75', pId: p.pId }) },
+            { label: 'Fast Foward 75.00%',labelAc:(p: PoolProps)=>`Fast Forward ${p.ffPercentage||75}%`, 
+                    action: (p: PoolProps) => onCZAction({ type: 'ff75', pId: p.pId, percentage:p.ffPercentage||75 }) },
             { label: 'Buy CZF', action: (p: PoolProps) => onCZAction({ type: 'buyCZF', pId: p.pId }) },
         ]
     };
@@ -147,9 +148,9 @@ function fromPool(web3: Web3, { poolType, pId, accountInfo, poolInfo }: PoolRPCP
     const durationDays = Math.ceil(m_duration.asDays());
     const durationMonths = Math.ceil(m_duration.asMonths());
 
-    
 
-    const apr = durtaionSeconds > 0 ? Number.parseFloat((ROI * (365 * 24 * 3600) /durtaionSeconds).toFixed(2)) :0;
+
+    const apr = durtaionSeconds > 0 ? Number.parseFloat((ROI * (365 * 24 * 3600) / durtaionSeconds).toFixed(2)) : 0;
 
     const partialYear = durationMonths % 12;
 
@@ -195,9 +196,9 @@ export function useLoadPools() {
     //const [exoticPools, setExoticPools] = useState<IAsyncResult<{ [lp: string]: PoolListProps }>>({});
     //const [chronoPools, setChronoPools] = useState<IAsyncResult<PoolProps[]>>();
 
-    const [farmPools, setFarmPools] = useState<IAsyncResult<{ 
-        exoticPools:{ [lp: string]: PoolListProps };
-        chronoPools:PoolProps[]
+    const [farmPools, setFarmPools] = useState<IAsyncResult<{
+        exoticPools: { [lp: string]: PoolListProps };
+        chronoPools: PoolProps[]
     }>>({});
 
     const { account, networkId, nounce } = useAccountCtx();
@@ -208,29 +209,52 @@ export function useLoadPools() {
             try {
 
 
-                const loadChronoPools = async ()=>{
+                const loadChronoPools = async () => {
                     //setChronoPools({ isLoading: true });
 
                     const { web3ro, chainInfo } = await readOnly();
-    
+
                     const chronoPoolService: ChronoPoolService = new web3ro.eth.Contract(ChronoPoolService_JSON.abi as any, chainInfo.contracts.chronoPoolService) as any;
-    
+
                     let result: PoolProps[] = [];
                     //max 50 pools
                     for (let pId = 0; pId <= 50; pId++) {
-    
+
                         try {
                             const poolInfo = await chronoPoolService.methods.getChronoPoolInfo(pId).call();
                             const accountInfo = account && await chronoPoolService.methods.getChronoPoolAccountInfo(account, pId).call() || undefined;
-    
+
                             const pDetails = fromPool(web3ro, { pId, poolInfo, accountInfo, poolType: { type: 'chronoPool' } });
                             if (!pDetails.apr) {
                                 console.log(`pid ${pDetails.pId} has 0 apr`);
                                 continue;
                             }
-    
-                            result.push(pDetails);
-    
+
+
+                            let ffPercentage = 75;
+                            switch (pDetails.durationDays) {
+                                case 30: //1 month
+                                    ffPercentage = 50;
+                                    break;
+                                case 90: //3 months
+                                    ffPercentage = 30;
+                                    break;
+                                case 365: //a year
+                                    ffPercentage = 5;
+                                    break;
+                                case 548: //18 months
+                                    ffPercentage = 3;
+                                    break;
+                                case 1460: //4 years
+                                    ffPercentage = 0.75;
+                                    break;
+                                case 3650: //10 years
+                                    ffPercentage = 0.35;
+                                    break;
+                            }
+
+                            result.push({...pDetails,ffPercentage});
+
                             /*
     
                             const { duration, durationDays } = durationFromSeconds(poolInfo.vestPeriod_);
@@ -247,9 +271,9 @@ export function useLoadPools() {
     
                             result.push({ type: 'chronoPool', pId, duration, durationDays, apr, czfPerDay: czf, harvestableFn: harvestable });
                             */
-    
+
                         } catch (error: any) {
-    
+
                             if (error.toString().includes('reverted')) {
                                 console.debug('no more pools');
                                 break;
@@ -258,47 +282,60 @@ export function useLoadPools() {
                             }
                         }
                     }
-    
+
                     result = result.sort((a, b) => a.durationDays - b.durationDays);
-    
+
                     /*
                     if(result.length>0 && onPoolSelected){
                         onPoolSelected(result[0]);
                     }
                     */
-    
+
                     //setChronoPools({ result });
 
                     return result;
-    
+
                 }
 
                 const loadExoticPools = async () => {
                     //setExoticPools({ isLoading: true });
 
                     const { web3ro, chainInfo } = await readOnly();
-    
+
                     const exoticMaster: ExoticMaster = new web3ro.eth.Contract(ExoticMaster_JSON.abi as any, chainInfo.contracts.exoticMaster) as any;
-    
+
                     const poolsMap: { [lp: string]: PoolListProps } = {};
-    
+
                     //max 50 pools
                     for (let pId = 0; pId <= 50; pId++) {
-    
+
                         try {
-    
+
                             //const k = await exoticMaster.methods.getCzfPerLPWad(pId).call();
-    
+
                             const poolInfo = await exoticMaster.methods.getExoticFarmInfo(pId).call();
                             const accountInfo = account && await exoticMaster.methods.getExoticFarmAccountInfo(account, pId).call() || undefined;
-    
-                            const pDetails = fromPool(web3ro, { pId, poolInfo, accountInfo, poolType: { type: 'exoticfarm', lp: poolInfo.lp_ } });
+
+                            let pDetails = fromPool(web3ro, { pId, poolInfo, accountInfo, poolType: { type: 'exoticfarm', lp: poolInfo.lp_ } });
                             if (!pDetails.apr) {
                                 console.log(`pid ${pDetails.pId} has 0 apr`);
                                 continue;
                             }
-    
-    
+
+                            let ffPercentage = 75;
+                            switch (pDetails.durationDays) {
+                                case 90: //3 months
+                                    ffPercentage = 30;
+                                    break;
+                                case 365: //a year
+                                    ffPercentage = 5;
+                                    break;
+                            }
+
+                            pDetails = {...pDetails,ffPercentage};
+
+
+
                             /*
                             const { duration, durationDays } = durationFromSeconds(poolInfo.vestPeriod_);
                             const apr = Number.parseInt(poolInfo.adjustedRateBasis_) / 100.0;
@@ -314,50 +351,50 @@ export function useLoadPools() {
     
                             }
                             */
-    
+
                             if (!poolsMap[poolInfo.lp_]) {
-    
-                                
-    
+
+
+
                                 const foundLpDef = _lpDefination[poolInfo.lp_];
-    
+
                                 if (!foundLpDef) {
                                     throw new Error(`Unknown LP ${poolInfo.lp_}`);
                                 }
-    
+
                                 let lpBalance_eth = 0;
                                 let lpAllowance_eth = 0;
                                 let lpBalance_Wei = '0';
-                                let lpAllowance_Wei ='0';
-    
-    
+                                let lpAllowance_Wei = '0';
+
+
                                 if (undefined !== account) {
                                     const bep20: CZFarm = new web3ro.eth.Contract(CZFarm_JSON.abi as any, poolInfo.lp_) as any;
-    
+
                                     lpAllowance_Wei = await bep20.methods.allowance(account, chainInfo.contracts.exoticMaster).call();
                                     lpBalance_Wei = await bep20.methods.balanceOf(account).call();
-    
+
                                     lpAllowance_eth = Number.parseFloat(web3ro.utils.fromWei(lpAllowance_Wei));
-    
+
                                     lpBalance_eth = Number.parseFloat(web3ro.utils.fromWei(lpBalance_Wei));
-    
+
                                     console.log(`lpAllowance_Wei = ${lpAllowance_Wei}, lpBalance_Wei=${lpBalance_Wei}`);
                                 }
-    
-                                const lpProps = { ...foundLpDef, lpBalance_eth, lpAllowance_Wei,lpAllowance_eth, lpBalance_Wei };
-    
+
+                                const lpProps = { ...foundLpDef, lpBalance_eth, lpAllowance_Wei, lpAllowance_eth, lpBalance_Wei };
+
                                 poolsMap[poolInfo.lp_] = {
                                     lpProps,
                                     pools: [],
                                 };
                             }
-    
+
                             poolsMap[poolInfo.lp_].pools.push(pDetails);
-    
+
                             //poolsMap[poolInfo.lp_].pools.push({ type: 'exoticfarm', lp: poolInfo.lp_, pId, duration, durationDays, apr, czfPerDay: czf, harvestableFn: harvestable });
-    
+
                         } catch (error: any) {
-    
+
                             if (error.toString().includes('reverted')) {
                                 console.debug('no more exotic pools');
                                 break;
@@ -366,24 +403,26 @@ export function useLoadPools() {
                             }
                         }
                     }
-    
+
                     Object.keys(poolsMap).forEach(k => {
                         poolsMap[k].pools = poolsMap[k].pools.sort((a, b) => a.durationDays - b.durationDays);
                     });
-    
-    
+
+
                     //setPools({ result: Object.keys(poolsMap).map(k=>poolsMap[k])  });
                     //setExoticPools({ result: poolsMap });
                     return poolsMap;
-    
+
                 }
 
-                setFarmPools({isLoading:true});
+                setFarmPools({ isLoading: true });
 
                 const chronoPools = await loadChronoPools();
                 const exoticPools = await loadExoticPools();
 
-                setFarmPools({result:{chronoPools,exoticPools}});
+                
+
+                setFarmPools({ result: { chronoPools, exoticPools } });
 
             } catch (error: any) {
                 //setChronoPools({ error });
@@ -393,7 +432,7 @@ export function useLoadPools() {
         })();
     }, [account, networkId, nounce]);
 
-    return {farmPools};
+    return { farmPools };
     //return { exoticPools, chronoPools };
 }
 
@@ -448,7 +487,8 @@ export function ExoticFarms({ onCZAction }: {
             }
         },
         { label: 'Harvest CZF', action: (p: PoolProps) => onCZAction({ type: 'harvestCZF-lp', pId: p.pId }) },
-        { label: 'Fast Foward 75.00%', action: (p: PoolProps) => onCZAction({ type: 'ff75-lp', pId: p.pId }) },
+        { label: 'Fast Foward 75.00%', labelAc:(p: PoolProps)=>`Fast Forward ${p.ffPercentage||75}%`, 
+                 action: (p: PoolProps) => onCZAction({ type: 'ff75-lp', pId: p.pId, percentage:p.ffPercentage||75 }) },
         { label: 'Buy CZF', action: (p: PoolProps) => onCZAction({ type: 'buyCZF', pId: p.pId }) },
     ]
 
@@ -496,7 +536,7 @@ export function ExoticFarms({ onCZAction }: {
 type PoolLpProps = {
     title: string;
     guideUrl: string;
-    lpBalance_eth: number; lpAllowance_eth:number; lpAllowance_Wei: string; lpBalance_Wei :string;
+    lpBalance_eth: number; lpAllowance_eth: number; lpAllowance_Wei: string; lpBalance_Wei: string;
     cashLogo: string;
 }
 
@@ -504,7 +544,8 @@ type PoolListProps = {
     lpProps?: PoolLpProps;
     actions?: {
         Component?: (props: { pool: PoolProps, lp?: PoolLpProps }) => JSX.Element;
-        label: string, action: (p: PoolProps) => any
+        label: string, action: (p: PoolProps) => any;
+        labelAc?:(p: PoolProps)=>string;
     }[]
     pools: PoolProps[]
 };
@@ -601,20 +642,20 @@ function PoolsView({ poolList, title, guidePrompt, guideURL }: {
                         <EstHarvest p={p} />
                     </div>
 
-                    <Button variant='link'  className="poolColBtn"    onClick={() => {
+                    <Button variant='link' className="poolColBtn" onClick={() => {
                         if (expandedpId == p.pId) {
                             setExpandedpId(undefined);
                         } else {
                             setExpandedpId(p.pId);
                         }
                     }}>
-                        <div className={'poolBtn ' +(expandedpId == p.pId?'expanded':'notExpanded')}></div>
+                        <div className={'poolBtn ' + (expandedpId == p.pId ? 'expanded' : 'notExpanded')}></div>
                     </Button>
 
                 </div>
 
                 {expandedpId == p.pId &&
-                    <div className="px-5"><Row  className="poolViewActions p-4">
+                    <div className="px-5"><Row className="poolViewActions p-4">
 
                         {(pl.actions || []).map((a, actionIndex) => <Col lg key={actionIndex} className="text-center m-1" >
 
@@ -622,7 +663,7 @@ function PoolsView({ poolList, title, guidePrompt, guideURL }: {
                                 <Button size="lg" variant='secondary' className="mx-3 flex-grow-1" onClick={() => {
                                     a.action(p);
                                 }}>
-                                    {a.label}
+                                    {a.labelAc?a.labelAc(p) : a.label}
                                 </Button>
                             }
 
