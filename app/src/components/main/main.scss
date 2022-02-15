@@ -3,7 +3,13 @@
 @import "~bootstrap/scss/mixins";
 @import "~bootstrap/scss/utilities";
 
-
+#dropdown-pool{
+    border: solid 1px gray;
+    margin-left:0.5rem;
+    &:hover{
+        color:gray;
+    }
+}
 
 .app-dark-mode{
 

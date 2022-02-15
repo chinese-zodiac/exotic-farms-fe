@@ -5,8 +5,12 @@ import {
 } from 'react-bootstrap';
 
 import { useDisplayMode } from '../utils/display';
-
+import { useAccountCtx, supportedChains, useConnectCalls } from '../web3';
 import { useFarmPools } from '../pools';
+import { IAsyncResult } from '../utils';
+
+import { CZFarm } from '../../typechain/CZFarm';
+import CZFarm_JSON from '../../typechain/CZFarm.json';
 
 export type PoolTypeProps = { type: 'chronoPool' } | { type: 'exoticfarm', lp: string; };
 
@@ -175,17 +179,47 @@ export function LoopCZF({ onCZAction }: {
     onCZAction: (props: CZActionProps) => any;
 }) {
     const pools = useFarmPools();
+    const { readOnly, connect } = useConnectCalls();
+    const { account, networkId, nounce } = useAccountCtx();
     const [loopAmount, setLoopAmount] = useState<string>();
     const [selectedPool, setSelectedPool] = useState<PoolProps>();
 
     useEffect(() => {
 
-        const firstOne = pools?.result && pools?.result.chronoPools.length > 0 && pools?.result.chronoPools[0] || undefined;
-        if (firstOne) {
-            setSelectedPool(firstOne);
+        const defaultSelection = pools?.result && pools?.result.chronoPools.length > 0 && pools?.result.chronoPools[3] || undefined;
+        if (defaultSelection) {
+            setSelectedPool(defaultSelection);
         }
 
     }, [pools]);
+
+    useEffect(() => {
+
+    (async () => {
+      try {
+
+        const chainInfo = networkId && supportedChains.find(n => n.chainId == networkId) || undefined;
+
+        if (!chainInfo || undefined === account) {
+          return;
+        }
+
+        const { web3ro } = await readOnly();
+
+        const czFarm: CZFarm = new web3ro.eth.Contract(CZFarm_JSON.abi as any, chainInfo.contracts.czFarm) as any;
+        const currBalance_Wei = await czFarm.methods.balanceOf(account).call();
+
+        if(!loopAmount) {
+            setLoopAmount(web3ro.utils.fromWei(currBalance_Wei).replace(/\.[0-9]*/g,''));
+        }
+
+      } catch (error: any) {
+        //setCzfBalance({ error });
+      }
+
+        })();
+
+    }, [account, networkId, nounce, loopAmount]);
 
     if (!selectedPool) {
         return <div className="bg-secondary-mod text-center p-4">
@@ -200,7 +234,7 @@ export function LoopCZF({ onCZAction }: {
         <h4>Loop CZF for {selectedPool.apr}% APR</h4>
 
         <div className="d-flex flex-row justify-content-center align-items-center">
-            <h5 className="mt-2">CZF -&gt; CZF · </h5>
+            <h5 className="mt-2">CZF -&gt; CZF   </h5>
 
             <Dropdown>
                 <Dropdown.Toggle variant="Secondary" id="dropdown-pool">
