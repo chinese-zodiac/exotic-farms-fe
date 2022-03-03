@@ -31,12 +31,17 @@ const _lpDefination: {
     '0xeF8e8CfADC0b634b6d0065080a69F139159a17dE': {
         title: 'CZF/BNB on PCS',
         cashLogo: 'bnbLogo',
-        guideUrl: 'https://pancakeswap.finance/add/0x7c1608C004F20c3520f70b924E2BfeF092dA0043/BNB'
+        guideUrl: 'https://cz.cash/#/add/0x7c1608C004F20c3520f70b924E2BfeF092dA0043/BNB'
     },
     '0xAAC96d00C566571bafdfa3B8440Bdc3cDB223Ad0': {
         title: 'CZF/BUSD on PCS',
         cashLogo: 'busdLogo',
-        guideUrl: 'https://pancakeswap.finance/add/0x7c1608C004F20c3520f70b924E2BfeF092dA0043/0xe9e7cea3dedca5984780bafc599bd69add087d56'
+        guideUrl: 'https://cz.cash/#/add/0x7c1608C004F20c3520f70b924E2BfeF092dA0043/0xe9e7cea3dedca5984780bafc599bd69add087d56'
+    },
+    '0x98b5F5E7Ec32cda1F3E89936c9972f92296aFE47': {
+        title: 'CZF/CZUSD on PCS',
+        cashLogo: 'busdLogo',
+        guideUrl: 'https://cz.cash/#/add/0x7c1608C004F20c3520f70b924E2BfeF092dA0043/0xE68b79e51bf826534Ff37AA9CeE71a3842ee9c70'
     }
 }
 
@@ -288,6 +293,7 @@ export function useLoadPools() {
                         try {
     
                             //const k = await exoticMaster.methods.getCzfPerLPWad(pId).call();
+                            pId == 6 && console.log("pId",pId);
     
                             const poolInfo = await exoticMaster.methods.getExoticFarmInfo(pId).call();
                             const accountInfo = account && await exoticMaster.methods.getExoticFarmAccountInfo(account, pId).call() || undefined;
@@ -316,10 +322,12 @@ export function useLoadPools() {
                             */
     
                             if (!poolsMap[poolInfo.lp_]) {
+                                console.log(pId,"New lp",poolInfo.lp_)
     
                                 
     
                                 const foundLpDef = _lpDefination[poolInfo.lp_];
+                                console.log(foundLpDef)
     
                                 if (!foundLpDef) {
                                     throw new Error(`Unknown LP ${poolInfo.lp_}`);
@@ -351,8 +359,14 @@ export function useLoadPools() {
                                     pools: [],
                                 };
                             }
+
+                            console.log("Before pools map push")
     
                             poolsMap[poolInfo.lp_].pools.push(pDetails);
+
+                            console.log("Added to pools map")
+                            console.log(poolsMap)
+
     
                             //poolsMap[poolInfo.lp_].pools.push({ type: 'exoticfarm', lp: poolInfo.lp_, pId, duration, durationDays, apr, czfPerDay: czf, harvestableFn: harvestable });
     
