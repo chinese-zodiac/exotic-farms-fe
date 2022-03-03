@@ -21,13 +21,15 @@ export type PoolProps = {
     czfPerDay: number;
     harvestableFn: () => number;
     vested: number;
+    ffPercentage?:number;
 }
     & PoolTypeProps;
 
 
-export function FastForwardModal({ onClose, onConfirm }: {
+export function FastForwardModal({ onClose, onConfirm, percentage }: {
     onClose: () => any;
     onConfirm: (showFFWarning:boolean) => any;
+    percentage:number;
 }) {
     const [showFFwarning, setShowFFwarning] = useState(true);
     const { darkMode } = useDisplayMode();
@@ -42,7 +44,7 @@ export function FastForwardModal({ onClose, onConfirm }: {
         <Modal.Body>
 
             <p>
-                FastForward will cancel all your future vesting! You will only get 75.00% of the CZF you staked. Read more info at czodiac.gitbook.io
+                FastForward will cancel all your future vesting! You will only get {percentage}% of the CZF you staked. Read more info at czodiac.gitbook.io
             </p>
 
         </Modal.Body>
@@ -148,6 +150,7 @@ export type CZActionProps = { pId: number; } & ({
     type: 'harvestCZF';
 } | {
     type: 'ff75';
+    percentage: number;
 } | {
     type: 'ff75Confirmed';
 } | {
@@ -163,6 +166,7 @@ export type CZActionProps = { pId: number; } & ({
     type: 'harvestCZF-lp';
 } | {
     type: 'ff75-lp';
+    percentage: number;
 } | {
     type: 'ff75-lp-confirmed';
 } | {

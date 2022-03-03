@@ -286,6 +286,7 @@ export default function MainContent() {
         />}
 
         {loopAction?.type == 'ff75' && showFFwarning && <FastForwardModal
+            percentage={loopAction.percentage}
             onClose={() => setLoopAction(undefined)}
             onConfirm={(showff) => {
                 setShowFFwarning(showff);
@@ -294,6 +295,7 @@ export default function MainContent() {
         />}
 
         {loopAction?.type == 'ff75-lp' && showFFwarning && <FastForwardModal
+            percentage={loopAction.percentage}
             onClose={() => setLoopAction(undefined)}
             onConfirm={(showff) => {
                 setShowFFwarning(showff);
