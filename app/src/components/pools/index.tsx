@@ -236,25 +236,25 @@ export function useLoadPools() {
                             }
 
 
-                            let ffPercentage = 75;
+                            let ffPercentage = 95;
                             switch (pDetails.durationDays) {
                                 case 30: //1 month
-                                    ffPercentage = 50;
+                                    ffPercentage = 90;
                                     break;
                                 case 90: //3 months
-                                    ffPercentage = 30;
+                                    ffPercentage = 80;
                                     break;
                                 case 365: //a year
-                                    ffPercentage = 5;
+                                    ffPercentage = 15;
                                     break;
                                 case 548: //18 months
-                                    ffPercentage = 3;
+                                    ffPercentage = 12;
                                     break;
                                 case 1460: //4 years
-                                    ffPercentage = 0.75;
+                                    ffPercentage = 5;
                                     break;
                                 case 3650: //10 years
-                                    ffPercentage = 0.35;
+                                    ffPercentage = 1;
                                     break;
                             }
 
